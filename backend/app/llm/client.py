@@ -9,7 +9,8 @@ from typing import Any, Dict, List, Optional
 from app.core.config import settings
 from app.engine.models import Question
 from app.llm.base import LLMProvider, LLMProviderError
-from app.llm.openrouter_provider import OpenRouterPoolProvider
+from app.llm.groq_provider import GroqProvider
+from app.llm.gemini_provider import GeminiProvider
 from app.llm.mock_provider import MockProvider
 from app.llm.prompts import (
     SYSTEM_PROMPT_HYPOTHESIS_GENERATION,
@@ -19,6 +20,7 @@ from app.llm.prompts import (
     USER_PROMPT_HYPOTHESIS_GENERATION,
     USER_PROMPT_QUESTION_GENERATION,
     USER_PROMPT_REMEDIATION,
+    USER_PROMPT_REMEDIATION_GENERIC,
     USER_PROMPT_SELF_CONSISTENCY,
 )
 from app.llm.schemas import (
@@ -307,8 +309,8 @@ def generate_default_visual_svg(misconception_id: str, concept: str, label: str)
 
 class LLMClient:
     """
-    Unified client providing resilient LLM completion via OpenRouter Auto-Rotating Pool,
-    with transparent Mock fallback for testing and offline development.
+    Unified client providing resilient LLM completion via primary (Groq) and 
+    fallback (Gemini) providers, with transparent Mock fallback for testing.
     """
 
     def __init__(
@@ -320,17 +322,17 @@ class LLMClient:
 
         self.mock_provider = mock_provider or MockProvider()
         
-        # Use OpenRouter for all calls, but allow routing based on task
-        api_keys = settings.OPEN_ROUTER_API or settings.OPENROUTER_API_KEY
+        self.diagnostic_provider = GroqProvider(
+            api_key=settings.GROQ_API_KEY,
+            model=settings.GROQ_MODEL,
+            api_url=settings.GROQ_API_URL,
+        ) if settings.GROQ_API_KEY else None
         
-        self.diagnostic_provider = OpenRouterPoolProvider(
-            api_keys_str=api_keys,
-            model=settings.OPENROUTER_DIAGNOSTIC_MODEL,
-        )
-        self.remediation_provider = OpenRouterPoolProvider(
-            api_keys_str=api_keys,
-            model=settings.OPENROUTER_REMEDIATION_MODEL,
-        )
+        self.remediation_provider = GeminiProvider(
+            api_key=settings.GEMINI_API_KEY,
+            model=settings.GEMINI_MODEL,
+            api_url=settings.GEMINI_API_URL,
+        ) if settings.GEMINI_API_KEY else None
 
     async def complete(
         self,
@@ -341,7 +343,7 @@ class LLMClient:
         preferred_provider: Optional[str] = None,
     ) -> LLMResponse:
         """
-        Executes completion using OpenRouter multi-key pool.
+        Executes completion with resilience: Primary -> Secondary -> Mock
         """
         if self.mode == "mock":
             return await self.mock_provider.complete(
@@ -351,26 +353,34 @@ class LLMClient:
                 temperature=temperature,
             )
 
-        provider = self.remediation_provider if preferred_provider == "gemini" else self.diagnostic_provider
+        providers = []
+        if preferred_provider == "gemini" and self.remediation_provider:
+            providers = [self.remediation_provider, self.diagnostic_provider]
+        else:
+            providers = [self.diagnostic_provider, self.remediation_provider]
 
-        try:
-            return await provider.complete(
-                prompt=prompt,
-                system_prompt=system_prompt,
-                json_mode=json_mode,
-                temperature=temperature,
-            )
-        except LLMProviderError as err:
-            logger.error("OpenRouter provider '%s' failed: %s", provider.model_name, err.message)
-            if settings.ENVIRONMENT == "development" or not (settings.OPEN_ROUTER_API or settings.OPENROUTER_API_KEY):
-                logger.info("Engaging MockProvider as ultimate development fallback.")
-                return await self.mock_provider.complete(
+        providers = [p for p in providers if p is not None]
+
+        for provider in providers:
+            try:
+                return await provider.complete(
                     prompt=prompt,
                     system_prompt=system_prompt,
                     json_mode=json_mode,
                     temperature=temperature,
                 )
-            raise err
+            except LLMProviderError as err:
+                logger.warning("Provider '%s' failed: %s. Trying next...", provider.model_name, err.message)
+
+        if settings.ENVIRONMENT == "development" or not providers:
+            logger.info("Engaging MockProvider as ultimate fallback.")
+            return await self.mock_provider.complete(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                json_mode=json_mode,
+                temperature=temperature,
+            )
+        raise LLMProviderError("All available live providers failed.", provider_name="System")
 
     async def propose_hypotheses(
         self,
@@ -438,7 +448,12 @@ class LLMClient:
         reference_material: Optional[str] = None,
     ) -> RemediationResponse:
         """Calls LLM to synthesize targeted conceptual remediation with multi-modal artifacts."""
-        prompt = USER_PROMPT_REMEDIATION.format(
+        if misconception_id in ["guessing", "incomplete_knowledge"]:
+            prompt_template = USER_PROMPT_REMEDIATION_GENERIC
+        else:
+            prompt_template = USER_PROMPT_REMEDIATION
+            
+        prompt = prompt_template.format(
             concept=concept,
             misconception_id=misconception_id,
             misconception_label=misconception_label,

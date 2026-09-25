@@ -4,7 +4,8 @@ LLM abstraction and service layer.
 
 from app.llm.base import LLMProvider, LLMProviderError
 from app.llm.client import LLMClient
-from app.llm.openrouter_provider import OpenRouterPoolProvider
+from app.llm.groq_provider import GroqProvider
+from app.llm.gemini_provider import GeminiProvider
 from app.llm.mock_provider import MockProvider
 from app.llm.schemas import (
     HypothesisProposalResponse,

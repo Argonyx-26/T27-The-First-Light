@@ -476,6 +476,40 @@ async def submit_answer(
     )
 
     # ==========================================================================
+    # NEW LOGIC: Confidence based routing (Low confidence <= 3)
+    # ==========================================================================
+    if req.confidence <= 3 and session.status != "diagnosing":
+        diag_id = "guessing" if is_correct else "incomplete_knowledge"
+        diag_label = "Guessing / Needs Revision" if is_correct else "Incomplete Knowledge"
+        diag_desc = (
+            "You got it right, but your low confidence suggests you might have been guessing. Let's review the core concept." 
+            if is_correct else 
+            "Your low confidence indicates you aren't sure about this topic rather than holding a deep misconception. Let's study it."
+        )
+        
+        misc_repo.record_evidence(db, req.session_id, question.id, diag_id, f"{'Correct' if is_correct else 'Incorrect'} with low confidence ({req.confidence}/5).")
+        session_repo.update_session(db, req.session_id, status="confirmed", active_misconception_id=diag_id)
+        
+        from app.engine.models import DiagnosisSummary, PrimaryMisconceptionDiagnosis
+        return SubmitAnswerResponse(
+            session_id=req.session_id,
+            status="confirmed",
+            evaluation="correct" if is_correct else "incorrect",
+            active_hypotheses=[],
+            diagnosis=DiagnosisSummary(
+                confirmed=True,
+                primary_misconception=PrimaryMisconceptionDiagnosis(
+                    id=diag_id,
+                    name=diag_label,
+                    description=diag_desc,
+                    confidence_score=1.0,
+                ),
+                evidence=[],
+                alternatives=[],
+            )
+        )
+
+    # ==========================================================================
     # Scenario A: Student is CORRECT
     # ==========================================================================
     if is_correct and session.status != "diagnosing":

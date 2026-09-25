@@ -95,6 +95,41 @@ Respond ONLY with a JSON object in this exact schema:
 }}
 """
 
+USER_PROMPT_REMEDIATION_GENERIC = """A student needs a detailed study review of a concept because they demonstrated {misconception_label}.
+
+CONCEPT: {concept}
+Status: {misconception_label}
+Description: {misconception_description}
+Observed Student Evidence:
+{evidence_summary}
+{reference_context}
+
+Provide a comprehensive and engaging study guide for this concept to resolve their incomplete knowledge.
+Explain the core principles clearly. Give an intuitive analogy. Ground your explanation in the reference material when provided.
+You MUST provide a clear, step-by-step comparison highlighting the differences between a "Common Misunderstanding / Guess" and the "Actual Concept".
+Also provide a Feynman Technique breakdown: explain the idea as if teaching a bright 12-year-old, using zero jargon and crystal-clear everyday comparisons.
+
+You MUST provide a `visual_artifact_svg` containing a raw, valid, standalone SVG string (no markdown backticks around it). The SVG should draw a neat educational flowchart or diagram explaining the core concept clearly. Ensure it has a white/transparent background and clear text. IMPORTANT: Since this SVG is inside a JSON string, you MUST either escape all double quotes within the SVG (e.g. \") or use single quotes for all SVG attributes (e.g. viewBox='0 0 100 100').
+
+Respond ONLY with a JSON object in this exact schema:
+{{
+  "misconception_id": "{misconception_id}",
+  "remediation_title": "Detailed Concept Review: {concept}",
+  "remediation_text": "Clear and comprehensive explanation of the core concept.",
+  "differences": [
+    {{
+      "misconception_aspect": "What one might guess",
+      "reality_aspect": "What the science actually says"
+    }}
+  ],
+  "example": "A memorable real-world analogy.",
+  "key_takeaway": "A concise one-sentence rule the student can apply immediately.",
+  "check_for_understanding": "A short self-reflective question prompting the student to verify their new understanding.",
+  "feynman_explanation": "Feynman Technique explanation: explain simply to a 12-year-old using clear everyday analogies and zero technical jargon.",
+  "visual_artifact_svg": "<svg xmlns='http://www.w3.org/2000/svg' ...>...</svg>"
+}}
+"""
+
 # ==============================================================================
 # 3. Self-Consistency Simulation Prompt
 # ==============================================================================

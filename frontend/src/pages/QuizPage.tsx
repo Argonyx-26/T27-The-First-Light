@@ -167,7 +167,7 @@ export const QuizPage: React.FC = () => {
 
       setNextPendingQuestion(res.next_question || null);
 
-      if (isCorrect) {
+      if (isCorrect && !isConfirmed) {
         setAnsweredState({
           submitted: true,
           isCorrect: true,
@@ -176,17 +176,18 @@ export const QuizPage: React.FC = () => {
           followUpNumber: followUpCount,
         });
       } else {
-        // Incorrect answer
+        // Incorrect answer or Confirmed Guessing (isCorrect && isConfirmed)
         if (!inProbingLoop) {
           // Initiate 2-question follow-up probing loop
           setInProbingLoop(true);
           setFollowUpCount(1);
           setAnsweredState({
             submitted: true,
-            isCorrect: false,
+            isCorrect,
             confirmed: isConfirmed,
             wasProbing: false,
             followUpNumber: 1,
+            explanation: res.diagnosis?.primary_misconception?.id,
           });
         } else {
           // Already in probing loop
@@ -195,10 +196,11 @@ export const QuizPage: React.FC = () => {
 
           setAnsweredState({
             submitted: true,
-            isCorrect: false,
+            isCorrect,
             confirmed: confirmedMisconception,
             wasProbing: true,
             followUpNumber: followUpCount,
+            explanation: res.diagnosis?.primary_misconception?.id,
           });
 
           if (!confirmedMisconception) {
@@ -386,14 +388,19 @@ export const QuizPage: React.FC = () => {
             <div className="p-6 rounded-xl border border-purple-300 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
                 <span className="text-xs uppercase font-bold tracking-wider text-purple-700 block">
-                  Misconception Confirmed
+                  {["guessing", "incomplete_knowledge"].includes(answeredState.explanation || "") 
+                    ? "Concept Review Recommended" 
+                    : "Misconception Confirmed"}
                 </span>
                 <h4 className="text-lg font-bold text-slate-900">
-                  We found the pattern in your reasoning.
+                  {["guessing", "incomplete_knowledge"].includes(answeredState.explanation || "")
+                    ? "Let's solidify your foundation on this topic."
+                    : "We found the pattern in your reasoning."}
                 </h4>
                 <p className="text-xs sm:text-sm text-slate-600 max-w-xl">
-                  Across these diagnostic questions, an intuitive misconception was identified.
-                  Let&apos;s master this concept right now using a Feynman breakdown, a visual schematic, and curated video clips.
+                  {["guessing", "incomplete_knowledge"].includes(answeredState.explanation || "")
+                    ? "Based on your confidence level, it seems you need a quick review of the core principles. Let's study it now with a detailed breakdown and video."
+                    : "Across these diagnostic questions, an intuitive misconception was identified. Let's master this concept right now using a Feynman breakdown, a visual schematic, and curated video clips."}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto flex-shrink-0">
