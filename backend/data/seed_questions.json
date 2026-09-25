@@ -1,0 +1,1147 @@
+{
+  "questions": [
+    {
+      "id": "physics_newton_q01",
+      "concept": "Newton's First Law",
+      "topic": "Newton's Laws",
+      "prerequisite": "Inertia, Net Force, and Velocity",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A deep-space probe is coasting at a constant velocity of 20,000 km/h far from any gravitational source, with its propulsion engines turned off. What is the net external force acting on the probe?",
+      "options": {
+        "A": "A continuous forward net force proportional to the probe's mass multiplied by its speed.",
+        "B": "Zero net force.",
+        "C": "A small continuous forward force required to actively overcome cosmic inertia.",
+        "D": "A backward resistive force equal to its momentum."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "force_acceleration_confusion",
+        "C": "mass_inertia_resistance",
+        "D": "action_reaction_cancellation"
+      },
+      "diagnostic_targets": [
+        "force_acceleration_confusion",
+        "mass_inertia_resistance"
+      ],
+      "explanation": "Newton's First Law states that an object continues in its state of rest or uniform motion in a straight line unless acted upon by a non-zero net external force. In frictionless deep space at constant velocity, net force is exactly zero."
+    },
+    {
+      "id": "physics_newton_diag_01",
+      "concept": "Newton's First Law",
+      "topic": "Newton's Laws",
+      "prerequisite": "Contact forces and inertia",
+      "difficulty": "medium",
+      "question_type": "diagnostic",
+      "question_text": "A hockey puck is given a swift horizontal push across perfectly frictionless ice. Immediately after the player's stick loses physical contact with the puck, which horizontal forces continue to act on the puck as it glides?",
+      "options": {
+        "A": "The forward pushing force imparted by the stick remains stored in the puck keeping it moving.",
+        "B": "No horizontal forces act on the puck.",
+        "C": "An internal inertia force that actively propels the puck forward.",
+        "D": "A force proportional to the acceleration the stick originally gave it."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "force_acceleration_confusion",
+        "C": "mass_inertia_resistance",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "force_acceleration_confusion",
+        "mass_inertia_resistance"
+      ],
+      "explanation": "Once contact is broken, the stick can exert no force. On frictionless ice with zero air resistance, no horizontal forces act on the puck, yet it continues moving at constant velocity."
+    },
+    {
+      "id": "physics_newton_diag_02",
+      "concept": "Newton's First Law",
+      "topic": "Newton's Laws",
+      "prerequisite": "Concept of inertia as mass",
+      "difficulty": "medium",
+      "question_type": "diagnostic",
+      "question_text": "An astronaut in a zero-gravity environment nudges a massive 500 kg crate so it drifts toward a docking bay at 0.5 m/s. While drifting, why does the crate require zero propulsion to keep coasting?",
+      "options": {
+        "A": "Because its forward force is balanced by an equal forward inertia force.",
+        "B": "Because inertia is a passive property (mass) resisting changes in motion, not an active force that must be overcome.",
+        "C": "Because the crate's internal inertia force pushes back against empty space to maintain speed.",
+        "D": "Because the thrust energy from the astronaut's hand is stored as perpetual kinetic force."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "action_reaction_cancellation",
+        "C": "mass_inertia_resistance",
+        "D": "force_acceleration_confusion"
+      },
+      "diagnostic_targets": [
+        "mass_inertia_resistance",
+        "force_acceleration_confusion"
+      ],
+      "explanation": "Inertia is not a force; it is the intrinsic property of mass that resists changes to its velocity. No force is required to sustain uniform motion."
+    },
+    {
+      "id": "physics_newton_verify_01",
+      "concept": "Newton's First Law",
+      "topic": "Newton's Laws",
+      "prerequisite": "Vertical motion and tension",
+      "difficulty": "medium",
+      "question_type": "verification",
+      "verified_misconception_id": "force_acceleration_confusion",
+      "question_text": "An elevator cab of mass 1,000 kg is moving vertically UPWARD at a steady, constant speed of 3.0 m/s. Comparing the upward cable tension (T) to the downward gravitational force (W = mg):",
+      "options": {
+        "A": "T must be strictly greater than W to sustain upward motion.",
+        "B": "T is exactly equal to W because acceleration is zero.",
+        "C": "T must be less than W because motion is constant.",
+        "D": "T must equal W plus an additional force proportional to its 3.0 m/s velocity."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "force_acceleration_confusion",
+        "C": "calculation_error",
+        "D": "force_acceleration_confusion"
+      },
+      "diagnostic_targets": [
+        "force_acceleration_confusion"
+      ],
+      "explanation": "Since the elevator is moving at constant velocity (zero acceleration), the net force must be zero (F_net = T - W = 0 => T = W). Upward motion does not require upward net force."
+    },
+    {
+      "id": "physics_newton_verify_02",
+      "concept": "Newton's First Law",
+      "topic": "Newton's Laws",
+      "prerequisite": "Inertia and mass",
+      "difficulty": "medium",
+      "question_type": "verification",
+      "verified_misconception_id": "mass_inertia_resistance",
+      "question_text": "In deep space, two identical frictionless spheres, Sphere X (mass 1 kg) and Sphere Y (mass 100 kg), are both coasting at the same constant speed of 5 m/s. How do the net external forces acting on Sphere X and Sphere Y compare?",
+      "options": {
+        "A": "Sphere Y requires 100 times more continuous net force to overcome its greater inertia.",
+        "B": "Both spheres experience exactly zero net external force.",
+        "C": "Sphere X requires more force because lower mass allows inertia to leak away faster.",
+        "D": "Sphere Y experiences a continuous resistance force proportional to its mass."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "mass_inertia_resistance",
+        "C": "calculation_error",
+        "D": "mass_inertia_resistance"
+      },
+      "diagnostic_targets": [
+        "mass_inertia_resistance"
+      ],
+      "explanation": "Both spheres have zero acceleration. Therefore, according to Newton's First Law, both experience zero net external force regardless of their difference in mass."
+    },
+    {
+      "id": "physics_newton_q02",
+      "concept": "Newton's Third Law",
+      "topic": "Newton's Laws",
+      "prerequisite": "Interaction pairs",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A massive transport truck collides head-on with a small compact car. During the collision, how does the magnitude of the force exerted by the truck on the car compare to the magnitude of the force exerted by the car on the truck?",
+      "options": {
+        "A": "The truck exerts a greater force because it has significantly more mass and momentum.",
+        "B": "The two forces are exactly equal in magnitude and opposite in direction.",
+        "C": "The car exerts a greater force because it suffers far more physical deformation.",
+        "D": "The forces cancel out to zero at the point of contact so no net force exists."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "mass_inertia_resistance",
+        "C": "calculation_error",
+        "D": "action_reaction_cancellation"
+      },
+      "diagnostic_targets": [
+        "action_reaction_cancellation",
+        "mass_inertia_resistance"
+      ],
+      "explanation": "Newton's Third Law states that every action force has an equal and opposite reaction force. The forces on the truck and car are strictly equal in magnitude, though the car experiences a larger acceleration due to its smaller mass (F = ma)."
+    },
+    {
+      "id": "physics_kinematics_q01",
+      "concept": "Kinematics in One Dimension",
+      "topic": "Kinematics",
+      "prerequisite": "Velocity and Acceleration Definitions",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A tennis ball is thrown straight upward into the air. At the exact instant the ball reaches the very peak of its trajectory (highest point), what are its velocity and acceleration?",
+      "options": {
+        "A": "Both its velocity and its acceleration are momentarily zero.",
+        "B": "Its velocity is zero, and its acceleration is approximately 9.8 m/s² directed downward.",
+        "C": "Its velocity is zero, and its acceleration is directed upward to initiate descent.",
+        "D": "Its acceleration is zero, but its velocity is still pointing upward."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "velocity_acceleration_conflation",
+        "C": "negative_acceleration_as_slowing",
+        "D": "velocity_acceleration_conflation"
+      },
+      "diagnostic_targets": [
+        "velocity_acceleration_conflation",
+        "negative_acceleration_as_slowing"
+      ],
+      "explanation": "At the peak, velocity passes through zero as it reverses direction, but gravity continues to exert a downward force of mg, causing constant downward acceleration of 9.8 m/s²."
+    },
+    {
+      "id": "physics_kinematics_diag_01",
+      "concept": "Kinematics in One Dimension",
+      "topic": "Kinematics",
+      "prerequisite": "Graphical interpretation of motion",
+      "difficulty": "medium",
+      "question_type": "diagnostic",
+      "question_text": "A cart moves along a straight horizontal track. At time t = 4 s, a sensor records that the cart's instantaneous velocity is v = 0 m/s. Can we conclude that the net force on the cart at t = 4 s is zero?",
+      "options": {
+        "A": "Yes, because whenever velocity is zero, acceleration and net force must also be zero.",
+        "B": "No, because the velocity could be instantaneously changing from positive to negative, meaning acceleration is non-zero.",
+        "C": "Yes, because motion has ceased so inertia has dissipated.",
+        "D": "No, only if the cart's mass is negative."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "velocity_acceleration_conflation",
+        "C": "force_acceleration_confusion",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "velocity_acceleration_conflation",
+        "force_acceleration_confusion"
+      ],
+      "explanation": "Zero instantaneous velocity does not imply zero acceleration. Acceleration is the rate of change of velocity (dv/dt)."
+    },
+    {
+      "id": "physics_kinematics_verify_01",
+      "concept": "Kinematics in One Dimension",
+      "topic": "Kinematics",
+      "prerequisite": "Pendulum or oscillating motion",
+      "difficulty": "medium",
+      "question_type": "verification",
+      "verified_misconception_id": "velocity_acceleration_conflation",
+      "question_text": "A simple pendulum swings back and forth. At the moment the pendulum bob reaches its maximum displacement (turning point where it momentarily halts), what is true of its tangential acceleration?",
+      "options": {
+        "A": "Tangential acceleration is zero because the bob has stopped moving.",
+        "B": "Tangential acceleration is at its maximum magnitude directed back toward equilibrium.",
+        "C": "Both velocity and acceleration must always reach their peaks together.",
+        "D": "Acceleration only exists when velocity exceeds 1 m/s."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "velocity_acceleration_conflation",
+        "C": "velocity_acceleration_conflation",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "velocity_acceleration_conflation"
+      ],
+      "explanation": "At the turning point, speed is momentarily zero, but the restoring component of gravity is maximized, producing maximum tangential acceleration."
+    },
+    {
+      "id": "chem_bonding_q01",
+      "concept": "Chemical Energetics in Bonding",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Bond dissociation energy concepts",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "When two isolated hydrogen atoms (H + H) collide and bond to form a stable H2 molecule, what occurs energetically?",
+      "options": {
+        "A": "Energy is released because the system falls into a lower potential energy well.",
+        "B": "Energy is absorbed because forming a chemical bond always requires an input of work.",
+        "C": "Energy is neither absorbed nor released because no other atoms are present.",
+        "D": "Energy is released only when the bond is subsequently broken."
+      },
+      "correct_option": "A",
+      "distractor_misconceptions": {
+        "B": "bond_breaking_releases_energy",
+        "C": "calculation_error",
+        "D": "bond_breaking_releases_energy"
+      },
+      "diagnostic_targets": [
+        "bond_breaking_releases_energy",
+        "rigid_octet_rule_absolute"
+      ],
+      "explanation": "Bond formation is an exothermic process (releases energy) as electrons achieve lower potential energy between nuclei. Breaking bonds always requires energy (endothermic)."
+    },
+    {
+      "id": "chem_bonding_diag_01",
+      "concept": "Chemical Energetics in Bonding",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Thermodynamics of ATP hydrolysis",
+      "difficulty": "medium",
+      "question_type": "diagnostic",
+      "question_text": "In biology and chemistry, ATP is often called an 'energy-rich molecule'. When the terminal phosphate bond of ATP is cleaved, why is overall energy released to power cellular work?",
+      "options": {
+        "A": "Because breaking the high-energy P-O bond directly releases the stored bond energy into the cell.",
+        "B": "Because the energy released during the formation of new, more stable bonds with water exceeds the energy absorbed to break the initial ATP bond.",
+        "C": "Because phosphate bonds violate the octet rule and burst under pressure.",
+        "D": "Because ATP contains pure kinetic force stored inside its atomic orbitals."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "bond_breaking_releases_energy",
+        "C": "rigid_octet_rule_absolute",
+        "D": "force_acceleration_confusion"
+      },
+      "diagnostic_targets": [
+        "bond_breaking_releases_energy",
+        "rigid_octet_rule_absolute"
+      ],
+      "explanation": "Breaking the phosphate bond in ATP absorbs energy. The net energy release of ATP hydrolysis occurs because forming the new products (ADP + inorganic phosphate hydrated in water) releases more energy than was absorbed to break the original bond."
+    },
+    {
+      "id": "chem_bonding_verify_01",
+      "concept": "Chemical Energetics in Bonding",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Bond dissociation energy",
+      "difficulty": "medium",
+      "question_type": "verification",
+      "verified_misconception_id": "bond_breaking_releases_energy",
+      "question_text": "To split a stable diatomic chlorine molecule (Cl2) into two separate, neutral chlorine atoms (2 Cl), the reaction system must:",
+      "options": {
+        "A": "Absorb energy from the surroundings to overcome the covalent bond attraction (endothermic).",
+        "B": "Release energy to the surroundings as the stored bond snaps (exothermic).",
+        "C": "Release heat because free atoms are always at lower potential energy than bonded atoms.",
+        "D": "Maintain zero enthalpy change because no phase change occurs."
+      },
+      "correct_option": "A",
+      "distractor_misconceptions": {
+        "B": "bond_breaking_releases_energy",
+        "C": "bond_breaking_releases_energy",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "bond_breaking_releases_energy"
+      ],
+      "explanation": "Cleaving a chemical bond always requires the input of bond dissociation energy (endothermic). It never spontaneously releases energy upon breaking alone."
+    },
+    {
+      "id": "physics_newton_q07_3rdlaw",
+      "concept": "Newton's Third Law",
+      "topic": "Newton's Laws",
+      "prerequisite": "Action-reaction pairs and contact interactions",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A massive freight truck collides head-on with a tiny subcompact car. During the collision, how does the magnitude of the force exerted by the truck on the car compare to the force exerted by the car on the truck?",
+      "options": {
+        "A": "The truck exerts a greater force because it has vastly more mass and momentum.",
+        "B": "The two forces are exactly equal in magnitude.",
+        "C": "The truck exerts a greater force because the car undergoes much higher acceleration and damage.",
+        "D": "The car exerts a greater force initially as a defensive reaction."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "action_reaction_cancellation",
+        "C": "force_acceleration_confusion",
+        "D": "mass_inertia_resistance"
+      },
+      "diagnostic_targets": [
+        "action_reaction_cancellation",
+        "force_acceleration_confusion"
+      ],
+      "explanation": "Newton's Third Law states that forces always occur in matched pairs: Fa on b = -Fb on a. Regardless of masses or resultant accelerations, the forces are strictly equal in magnitude."
+    },
+    {
+      "id": "physics_newton_q08_normal_force",
+      "concept": "Normal Force & Gravity",
+      "topic": "Newton's Laws",
+      "prerequisite": "Contact forces and inclination",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A heavy wooden box rests motionless on a steep ramp inclined at 30 degrees to the horizontal. What is the magnitude of the normal force exerted by the ramp on the box?",
+      "options": {
+        "A": "It is exactly equal to the full weight of the box (mg).",
+        "B": "It is equal to mg * cos(30°), which is strictly less than the full weight.",
+        "C": "It is equal to mg * sin(30°).",
+        "D": "Zero, because normal force only exists on purely horizontal ground."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "normal_force_equals_gravity_always",
+        "C": "calculation_error",
+        "D": "mass_inertia_resistance"
+      },
+      "diagnostic_targets": [
+        "normal_force_equals_gravity_always"
+      ],
+      "explanation": "Normal force is the perpendicular contact constraint force. On an incline of angle θ, the perpendicular component of gravity is mg*cos(θ), so N = mg*cos(θ) < mg."
+    },
+    {
+      "id": "physics_newton_q09_apparent_weight",
+      "concept": "Apparent Weight & Elevators",
+      "topic": "Newton's Laws",
+      "prerequisite": "Accelerated reference frames and normal force",
+      "difficulty": "hard",
+      "question_type": "standard",
+      "question_text": "A 60 kg student stands on a bathroom scale inside an elevator cab. The elevator is moving downward but slowing down with an upward acceleration of 2.0 m/s². What reading does the scale show? (Take g = 9.8 m/s²)",
+      "options": {
+        "A": "Less than 60 kg (scale reads ~48 kg) because the elevator is descending.",
+        "B": "Greater than 60 kg (scale reads ~72 kg) because the net acceleration is directed upward.",
+        "C": "Exactly 60 kg because descending motion balances the deceleration.",
+        "D": "Zero kg because the downward velocity creates momentary weightlessness."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "force_acceleration_confusion",
+        "C": "mass_inertia_resistance",
+        "D": "apparent_weightlessness_means_zero_gravity"
+      },
+      "diagnostic_targets": [
+        "force_acceleration_confusion",
+        "apparent_weightlessness_means_zero_gravity"
+      ],
+      "explanation": "Scale reading is the normal force N. Newton's 2nd Law: N - mg = ma => N = m(g + a). Since acceleration a is directed upward (+2 m/s²), N = 60*(9.8 + 2.0) = 708 N, corresponding to a scale reading of ~72 kg."
+    },
+    {
+      "id": "physics_newton_q10_friction_propulsion",
+      "concept": "Friction & Acceleration",
+      "topic": "Newton's Laws",
+      "prerequisite": "Static and kinetic friction",
+      "difficulty": "hard",
+      "question_type": "standard",
+      "question_text": "When a sprinter launches forward out of the starting blocks, what horizontal force is primarily responsible for accelerating their entire body forward?",
+      "options": {
+        "A": "An internal muscular force pushing forward through the runner's torso.",
+        "B": "The static friction force exerted forward by the ground on the sprinter's shoes.",
+        "C": "Air resistance pushing behind the runner.",
+        "D": "Inertia pushing the sprinter from behind."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "force_acceleration_confusion",
+        "C": "calculation_error",
+        "D": "mass_inertia_resistance"
+      },
+      "diagnostic_targets": [
+        "friction_opposes_motion_only",
+        "force_acceleration_confusion"
+      ],
+      "explanation": "Internal muscular forces cannot accelerate the center of mass of the human body. The runner pushes backward against the ground; by Newton's 3rd Law, the ground pushes forward on the runner via static friction."
+    },
+    {
+      "id": "physics_newton_q11_orbit_gravity",
+      "concept": "Gravitation & Orbit",
+      "topic": "Newton's Laws",
+      "prerequisite": "Centripetal acceleration and gravity",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "Astronauts aboard the International Space Station (orbiting 400 km above Earth) float effortlessly. Why do they experience weightlessness?",
+      "options": {
+        "A": "Because at 400 km altitude, Earth's gravitational pull drops to exactly zero.",
+        "B": "Because the space station and astronauts are in continuous free-fall toward Earth together with zero contact force between them.",
+        "C": "Because the vacuum of space acts as a shield eliminating gravitational fields.",
+        "D": "Because centrifugal force cancels out the mass of the astronauts."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "apparent_weightlessness_means_zero_gravity",
+        "C": "mass_inertia_resistance",
+        "D": "action_reaction_cancellation"
+      },
+      "diagnostic_targets": [
+        "apparent_weightlessness_means_zero_gravity"
+      ],
+      "explanation": "At 400 km, gravity is still ~89% of its surface value. Astronauts float because they and the station are in perpetual free-fall around Earth, leaving normal force N = 0."
+    },
+    {
+      "id": "physics_newton_q12_tug_of_war",
+      "concept": "Newton's Third Law & Ground Friction",
+      "topic": "Newton's Laws",
+      "prerequisite": "Free body diagrams with multiple external forces",
+      "difficulty": "hard",
+      "question_type": "standard",
+      "question_text": "In a tug-of-war match between Team A and Team B, Team A wins by pulling Team B across the midline. Which statement correctly explains why Team A won?",
+      "options": {
+        "A": "Team A pulled on the rope with a greater tension force than Team B pulled on the rope.",
+        "B": "The tension forces on the rope were equal, but Team A exerted a greater horizontal friction force against the ground.",
+        "C": "Team A's rope tension overcame Team B's inertia force directly through the rope fibers.",
+        "D": "Team B pulled with less force on the rope than Team A pulled on the ground."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "action_reaction_cancellation",
+        "C": "mass_inertia_resistance",
+        "D": "force_acceleration_confusion"
+      },
+      "diagnostic_targets": [
+        "action_reaction_cancellation"
+      ],
+      "explanation": "Assuming a light rope, the tension is uniform throughout, meaning both teams experience the same rope force. Team A wins because the horizontal ground reaction force on Team A exceeds that on Team B."
+    },
+    {
+      "id": "physics_newton_q13_equilibrium_turn",
+      "concept": "Uniform Circular Motion & Net Force",
+      "topic": "Newton's Laws",
+      "prerequisite": "Centripetal acceleration vs constant speed",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A car navigates a circular roundabout at a perfectly constant speed of 30 km/h. Is the car in equilibrium?",
+      "options": {
+        "A": "Yes, because its speed is constant so acceleration is zero.",
+        "B": "No, because the direction of velocity is continuously changing, requiring a non-zero net inward force.",
+        "C": "Yes, because the centrifugal force balances the friction force.",
+        "D": "No, because the engine is constantly supplying net forward force."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "force_acceleration_confusion",
+        "C": "action_reaction_cancellation",
+        "D": "mass_inertia_resistance"
+      },
+      "diagnostic_targets": [
+        "force_acceleration_confusion"
+      ],
+      "explanation": "Velocity is a vector quantity. Even if magnitude (speed) is constant, changing direction represents an acceleration (v^2/r) toward the center, requiring a net external centripetal force."
+    },
+    {
+      "id": "physics_newton_q14_terminal_velocity",
+      "concept": "Drag & Terminal Velocity",
+      "topic": "Newton's Laws",
+      "prerequisite": "Fluid drag and equilibrium",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A skydiver falls downward through the air and reaches a stable terminal velocity of 54 m/s. At this precise moment, what is the net vertical force acting on the skydiver?",
+      "options": {
+        "A": "A continuous downward net force equal to the skydiver's weight.",
+        "B": "Exactly zero net force.",
+        "C": "An upward net force because air drag has increased to stop acceleration.",
+        "D": "A net force proportional to the terminal speed squared."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "force_acceleration_confusion",
+        "C": "action_reaction_cancellation",
+        "D": "mass_inertia_resistance"
+      },
+      "diagnostic_targets": [
+        "force_acceleration_confusion"
+      ],
+      "explanation": "At terminal velocity, downward gravity is exactly matched by upward aerodynamic drag force (Fd = mg). Thus net force = 0 and acceleration = 0."
+    },
+    {
+      "id": "physics_newton_q15_projectile_apex",
+      "concept": "Newton's First & Second Laws at Trajectory Apex",
+      "topic": "Newton's Laws",
+      "prerequisite": "Vertical velocity and gravitational force",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A tennis ball is thrown straight upward into the air. At the very peak of its trajectory, when its velocity is momentarily zero, what forces act on the ball? (Neglect air drag)",
+      "options": {
+        "A": "Zero net force, because the ball has stopped moving.",
+        "B": "Only the downward gravitational force (weight).",
+        "C": "An upward inertia force balanced equally by downward gravity.",
+        "D": "A residual upward throwing force that has just decayed to zero."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "force_acceleration_confusion",
+        "C": "mass_inertia_resistance",
+        "D": "force_acceleration_confusion"
+      },
+      "diagnostic_targets": [
+        "force_acceleration_confusion",
+        "mass_inertia_resistance"
+      ],
+      "explanation": "Gravity never shuts off. At the peak, v = 0, but acceleration is still -9.8 m/s² downward due to the persistent force of gravity."
+    },
+    {
+      "id": "physics_kin_q04_displacement_distance",
+      "concept": "Displacement vs Distance",
+      "topic": "Kinematics",
+      "prerequisite": "Vector vs scalar quantities",
+      "difficulty": "easy",
+      "question_type": "standard",
+      "question_text": "An athlete runs exactly one full lap around a standard 400-meter circular track, returning to their starting block in 60 seconds. What are their total distance traveled and magnitude of displacement?",
+      "options": {
+        "A": "Distance = 400 m, Displacement = 400 m.",
+        "B": "Distance = 400 m, Displacement = 0 m.",
+        "C": "Distance = 0 m, Displacement = 400 m.",
+        "D": "Distance = 0 m, Displacement = 0 m."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "displacement_distance_confusion",
+        "C": "calculation_error",
+        "D": "displacement_distance_confusion"
+      },
+      "diagnostic_targets": [
+        "displacement_distance_confusion"
+      ],
+      "explanation": "Distance is the total scalar path length (400 m). Displacement is the vector difference between initial and final positions (xf - xi = 0 m)."
+    },
+    {
+      "id": "physics_kin_q05_zero_velocity_accel",
+      "concept": "Velocity vs Acceleration",
+      "topic": "Kinematics",
+      "prerequisite": "Instantaneous velocity and acceleration definitions",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "Can an object have zero instantaneous velocity and non-zero acceleration at the same instant?",
+      "options": {
+        "A": "No, because if velocity is zero, rate of change of velocity must also be zero.",
+        "B": "Yes, for example a ball thrown upward at its highest point or a pendulum at its turnaround point.",
+        "C": "No, acceleration can only exist when an object is actively traveling with speed.",
+        "D": "Yes, but only in non-inertial spinning reference frames."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "velocity_acceleration_conflation",
+        "C": "velocity_acceleration_conflation",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "velocity_acceleration_conflation"
+      ],
+      "explanation": "Acceleration is the derivative of velocity (dv/dt). A function can cross zero while its slope is non-zero (e.g. at apex of projectile, v = 0, a = -g)."
+    },
+    {
+      "id": "physics_kin_q06_negative_acceleration",
+      "concept": "Acceleration Signs & Deceleration",
+      "topic": "Kinematics",
+      "prerequisite": "One-dimensional vector signs",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A vehicle moves along the x-axis with negative velocity (v = -20 m/s) and experiences negative acceleration (a = -4 m/s²). What is happening to the vehicle's speed?",
+      "options": {
+        "A": "The vehicle is slowing down because acceleration is negative.",
+        "B": "The vehicle is speeding up in the negative direction.",
+        "C": "The vehicle is moving at constant speed because signs match.",
+        "D": "The vehicle immediately reverses direction."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "acceleration_deceleration_sign_confusion",
+        "C": "calculation_error",
+        "D": "velocity_acceleration_conflation"
+      },
+      "diagnostic_targets": [
+        "acceleration_deceleration_sign_confusion"
+      ],
+      "explanation": "Slowing down occurs when velocity and acceleration have OPPOSITE signs. When velocity and acceleration share the SAME sign (both negative), speed (|v|) increases."
+    },
+    {
+      "id": "physics_kin_q07_free_fall_mass",
+      "concept": "Free Fall Independence of Mass",
+      "topic": "Kinematics",
+      "prerequisite": "Galilean equivalence and gravitational acceleration",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A 10 kg bowling ball and a 0.05 kg tennis ball are dropped simultaneously from the same height in a vacuum chamber. Which lands first?",
+      "options": {
+        "A": "The bowling ball lands first because greater gravitational force pulls it down faster.",
+        "B": "They land at the exact same instant with the same speed.",
+        "C": "The tennis ball lands first because lower inertia allows it to accelerate more rapidly.",
+        "D": "The bowling ball lands first because heavy objects achieve higher terminal acceleration."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "heavier_falls_faster",
+        "C": "mass_inertia_resistance",
+        "D": "heavier_falls_faster"
+      },
+      "diagnostic_targets": [
+        "heavier_falls_faster"
+      ],
+      "explanation": "In a vacuum, acceleration due to gravity a = F/m = (G*M*m/r^2)/m = G*M/r^2 = g, which is independent of the dropped object's mass."
+    },
+    {
+      "id": "physics_kin_q08_average_speed_fallacy",
+      "concept": "Average Speed Calculation",
+      "topic": "Kinematics",
+      "prerequisite": "Time-weighted vs distance-weighted averages",
+      "difficulty": "hard",
+      "question_type": "standard",
+      "question_text": "A driver travels from Town A to Town B at a constant speed of 60 km/h, and returns along the exact same road from Town B to Town A at 120 km/h. What is the average speed for the round trip?",
+      "options": {
+        "A": "90 km/h (the arithmetic average: (60 + 120) / 2).",
+        "B": "80 km/h (the harmonic mean: total distance / total time).",
+        "C": "0 km/h because net displacement is zero.",
+        "D": "100 km/h because the higher speed dominates."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "average_velocity_equals_average_of_speeds",
+        "C": "displacement_distance_confusion",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "average_velocity_equals_average_of_speeds"
+      ],
+      "explanation": "Average speed is total distance divided by total time: 2D / (D/60 + D/120) = 2D / (3D/120) = 240 / 3 = 80 km/h. More time is spent driving at 60 km/h, weighting the average downward."
+    },
+    {
+      "id": "physics_kin_q09_vt_graph_area",
+      "concept": "Velocity-Time Graphs & Displacement",
+      "topic": "Kinematics",
+      "prerequisite": "Graphical integration and slopes",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "On a graph of velocity (vertical axis) versus time (horizontal axis), what does the geometric area between the curve and the time axis represent?",
+      "options": {
+        "A": "The instantaneous acceleration of the particle.",
+        "B": "The net displacement of the particle over that time interval.",
+        "C": "The total momentum imparted to the particle.",
+        "D": "The rate of change of acceleration."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "velocity_acceleration_conflation",
+        "C": "displacement_distance_confusion",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "velocity_acceleration_conflation"
+      ],
+      "explanation": "The integral of velocity with respect to time ∫v dt is displacement Δx. The slope of the curve represents acceleration (dv/dt)."
+    },
+    {
+      "id": "physics_kin_q10_projectile_horizontal_motion",
+      "concept": "Projectile Motion Orthogonality",
+      "topic": "Kinematics",
+      "prerequisite": "Independent horizontal and vertical components",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A cannonball is fired horizontally off a high ocean cliff at 150 m/s. Neglecting air resistance, what happens to the horizontal component of its velocity (vx) as it falls toward the water?",
+      "options": {
+        "A": "vx gradually decreases to zero as gravity curves the path downward.",
+        "B": "vx remains strictly constant at 150 m/s until impact.",
+        "C": "vx accelerates because the overall velocity vector magnitude increases.",
+        "D": "vx increases because gravitational pull pulls the ball diagonally forward."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "projectile_horizontal_force",
+        "C": "velocity_acceleration_conflation",
+        "D": "force_acceleration_confusion"
+      },
+      "diagnostic_targets": [
+        "projectile_horizontal_force"
+      ],
+      "explanation": "In projectile motion without air drag, ax = 0. Gravity acts strictly vertically (ay = -g). Therefore horizontal velocity vx is unchanged throughout the flight."
+    },
+    {
+      "id": "physics_kin_q11_bullet_dropped_vs_fired",
+      "concept": "Simultaneous Projectile Fall",
+      "topic": "Kinematics",
+      "prerequisite": "Component independence",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "Bullet A is dropped vertically from rest from a height of 2 meters. At the exact same microsecond, identical Bullet B is fired horizontally from the same height at 800 m/s over level ground. Neglecting air resistance, which bullet hits the ground first?",
+      "options": {
+        "A": "Bullet A hits first because Bullet B's immense forward speed lifts it against gravity.",
+        "B": "Both bullets strike the level ground at the exact same instant.",
+        "C": "Bullet B hits first because its high kinetic energy accelerates its descent.",
+        "D": "Bullet A hits first because Bullet B has to travel a vastly longer curved trajectory."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "projectile_horizontal_force",
+        "C": "calculation_error",
+        "D": "displacement_distance_confusion"
+      },
+      "diagnostic_targets": [
+        "projectile_horizontal_force"
+      ],
+      "explanation": "Both bullets start with zero vertical velocity (vy0 = 0) and accelerate downward at identical rate g. Vertical motion is completely decoupled from horizontal speed."
+    },
+    {
+      "id": "physics_kin_q12_st_graph_inflection",
+      "concept": "Position-Time Graph Interpretation",
+      "topic": "Kinematics",
+      "prerequisite": "Tangents and rates of change",
+      "difficulty": "hard",
+      "question_type": "standard",
+      "question_text": "On a position vs time (x vs t) graph, the curve has a horizontal tangent line (slope = 0) at t = 3.0 s. What physical quantity is guaranteed to be zero at t = 3.0 s?",
+      "options": {
+        "A": "The position of the particle (x = 0).",
+        "B": "The instantaneous velocity of the particle (v = 0).",
+        "C": "The acceleration of the particle (a = 0).",
+        "D": "Both velocity and acceleration."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "displacement_distance_confusion",
+        "C": "velocity_acceleration_conflation",
+        "D": "velocity_acceleration_conflation"
+      },
+      "diagnostic_targets": [
+        "velocity_acceleration_conflation"
+      ],
+      "explanation": "Instantaneous velocity is the slope of the position-time curve (dx/dt). A horizontal tangent means slope is 0, so v = 0. The curvature (concavity) determines acceleration, which can be non-zero."
+    },
+    {
+      "id": "physics_kin_q13_acceleration_direction",
+      "concept": "Centripetal Acceleration Vector Direction",
+      "topic": "Kinematics",
+      "prerequisite": "Vector subtraction for velocity changes",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "A racecar drives counter-clockwise around a circular track at constant speed. When the car is at the southernmost point heading due East, in what direction does its acceleration point?",
+      "options": {
+        "A": "Due East (in the direction of travel).",
+        "B": "Due North (toward the center of the track).",
+        "C": "Due South (centrifugal direction away from the track).",
+        "D": "Zero acceleration because speed is steady."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "velocity_acceleration_conflation",
+        "C": "action_reaction_cancellation",
+        "D": "force_acceleration_confusion"
+      },
+      "diagnostic_targets": [
+        "velocity_acceleration_conflation"
+      ],
+      "explanation": "In uniform circular motion, acceleration is strictly perpendicular to instantaneous velocity, pointing inward toward the center of the arc (North)."
+    },
+    {
+      "id": "physics_kin_q14_projectile_maximum_range",
+      "concept": "Launch Angle & Range",
+      "topic": "Kinematics",
+      "prerequisite": "Symmetric projectile range formula",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "Over flat, level terrain with negligible air resistance, which launch angle relative to the horizontal yields the maximum horizontal range for a given initial speed?",
+      "options": {
+        "A": "30° because flatter trajectories minimize air exposure time.",
+        "B": "45° because sin(2θ) reaches its maximum value of 1.0.",
+        "C": "60° because higher hang time allows the projectile to glide further.",
+        "D": "90° because vertical speed is maximized."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "calculation_error",
+        "C": "projectile_horizontal_force",
+        "D": "velocity_acceleration_conflation"
+      },
+      "diagnostic_targets": [
+        "projectile_horizontal_force"
+      ],
+      "explanation": "Range R = (v0^2 / g) * sin(2θ). The maximum of sin(2θ) occurs when 2θ = 90°, so θ = 45°."
+    },
+    {
+      "id": "physics_kin_q15_relative_velocity",
+      "concept": "Galilean Relative Velocity",
+      "topic": "Kinematics",
+      "prerequisite": "Relative motion vectors",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "Train A heads North at 80 km/h. Train B travels on an adjacent parallel track heading South at 60 km/h. What is the velocity of Train B as observed by a passenger seated in Train A?",
+      "options": {
+        "A": "20 km/h South.",
+        "B": "140 km/h South.",
+        "C": "140 km/h North.",
+        "D": "20 km/h North."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "calculation_error",
+        "C": "acceleration_deceleration_sign_confusion",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "displacement_distance_confusion"
+      ],
+      "explanation": "v(B rel A) = vB - vA. Taking North as positive: vA = +80, vB = -60. v(B rel A) = -60 - 80 = -140 km/h (140 km/h South)."
+    },
+    {
+      "id": "chem_bond_q04_boiling_covalent",
+      "concept": "Intermolecular vs Intramolecular Forces",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Phase changes vs chemical reactions",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "When liquid water (H2O) boils at 100°C to produce steam, what primary bonds or interactions are overcome?",
+      "options": {
+        "A": "The covalent O-H single bonds within the water molecules are cleaved into H2 and O2 gases.",
+        "B": "Intermolecular hydrogen bonds between neighboring water molecules are disrupted.",
+        "C": "Ionic attraction between H+ and OH- ions is broken.",
+        "D": "Nuclear forces between oxygen protons and hydrogen electrons are severed."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "intermolecular_intramolecular_conflation",
+        "C": "ionic_covalent_binary",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "intermolecular_intramolecular_conflation"
+      ],
+      "explanation": "Boiling is a physical phase transition. Thermal energy overcomes weak intermolecular hydrogen bonds between molecules; the covalent intramolecular O-H bonds inside the molecules remain intact."
+    },
+    {
+      "id": "chem_bond_q05_octet_rule_exceptions",
+      "concept": "Incomplete Octet & Expanded Octet",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Lewis structures and valence electrons",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "In the boron trifluoride molecule (BF3), how many valence electrons surround the central boron atom in its stable ground-state Lewis structure?",
+      "options": {
+        "A": "8 electrons, because all non-hydrogen main group elements must satisfy an octet.",
+        "B": "6 electrons, because boron forms a stable electron-deficient compound with an incomplete octet.",
+        "C": "10 electrons, because boron utilizes empty d-orbitals to expand its octet.",
+        "D": "4 electrons, forming two double bonds with fluorine."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "octet_rule_absolute",
+        "C": "octet_rule_absolute",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "octet_rule_absolute"
+      ],
+      "explanation": "Boron has only 3 valence electrons. In BF3, sharing 3 electrons with fluorines gives Boron 6 valence electrons (an incomplete octet), which is an exception to the octet rule."
+    },
+    {
+      "id": "chem_bond_q06_expanded_octet_period",
+      "concept": "Expanded Octets in Period 3",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Principal quantum numbers and d-subshells",
+      "difficulty": "hard",
+      "question_type": "standard",
+      "question_text": "Sulfur hexafluoride (SF6) exists as an exceptionally stable gas with 12 electrons around the central sulfur atom. Why can sulfur expand its octet, whereas oxygen (in OF6) cannot?",
+      "options": {
+        "A": "Sulfur has lower electronegativity, allowing it to give away electrons easily.",
+        "B": "Sulfur is in Period 3 with accessible 3d orbitals and sufficient atomic radius, whereas Period 2 oxygen lacks d orbitals.",
+        "C": "Oxygen always forms strictly ionic bonds, precluding multi-ligand covalent structures.",
+        "D": "Sulfur has more protons, which magnetically hold extra electron pairs."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "electronegativity_charge_confusion",
+        "C": "ionic_covalent_binary",
+        "D": "octet_rule_absolute"
+      },
+      "diagnostic_targets": [
+        "octet_rule_absolute"
+      ],
+      "explanation": "Period 2 elements (C, N, O, F) only have 2s and 2p valence orbitals, capping capacity at 8 electrons. Period 3 elements possess 3d subshells and larger radii, permitting hypervalent coordination."
+    },
+    {
+      "id": "chem_bond_q07_ionic_covalent_continuum",
+      "concept": "Bond Polarity & Electronegativity Difference",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Pauling electronegativity scale",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "Which statement best describes the nature of chemical bonds between elements with differing electronegativity?",
+      "options": {
+        "A": "Every bond is 100% purely ionic or 100% purely covalent with an abrupt boundary.",
+        "B": "Bonds exist along a continuous spectrum from nonpolar covalent to polar covalent to highly ionic depending on electronegativity difference.",
+        "C": "Bonds between non-metals are always 100% nonpolar covalent regardless of elements.",
+        "D": "Ionic bonds are formed by mechanical interlocking of electron orbitals."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "ionic_covalent_binary",
+        "C": "ionic_covalent_binary",
+        "D": "calculation_error"
+      },
+      "diagnostic_targets": [
+        "ionic_covalent_binary"
+      ],
+      "explanation": "Chemical bonding is a continuum. Nonpolar covalent, polar covalent, and ionic bonds represent varying degrees of unequal electron sharing based on ΔEN."
+    },
+    {
+      "id": "chem_bond_q08_lone_pair_repulsion",
+      "concept": "VSEPR & Electron Pair Repulsion",
+      "topic": "Chemical Bonding",
+      "prerequisite": "VSEPR theory and steric numbers",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "Both methane (CH4) and water (H2O) have a steric number of 4 around their central atoms. Why is water's H-O-H bond angle (104.5°) smaller than methane's tetrahedral angle (109.5°)?",
+      "options": {
+        "A": "Hydrogen atoms in water are heavier and pull downward.",
+        "B": "The two non-bonding lone pairs on oxygen exert greater electrostatic repulsion than bonding pairs, compressing the bond angle.",
+        "C": "Oxygen's high electronegativity converts the bonds into ionic attractions that pull atoms closer.",
+        "D": "Lone pairs take up zero space, leaving the bonding pairs with no angular guidance."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "calculation_error",
+        "C": "electronegativity_charge_confusion",
+        "D": "lone_pair_no_repulsion"
+      },
+      "diagnostic_targets": [
+        "lone_pair_no_repulsion"
+      ],
+      "explanation": "Under VSEPR theory, lone pair-lone pair repulsion > lone pair-bond pair repulsion > bond pair-bond pair repulsion. Non-bonding pairs reside closer to the nucleus, compressing adjacent bond angles."
+    },
+    {
+      "id": "chem_bond_q09_formal_charge_vs_oxidation",
+      "concept": "Formal Charge vs Oxidation State",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Electron bookkeeping methods",
+      "difficulty": "hard",
+      "question_type": "standard",
+      "question_text": "In the carbon dioxide molecule (O=C=O), what are the formal charge and oxidation state of the carbon atom?",
+      "options": {
+        "A": "Formal charge = 0, Oxidation state = +4.",
+        "B": "Formal charge = +4, Oxidation state = +4 (they are identical quantities).",
+        "C": "Formal charge = +2, Oxidation state = 0.",
+        "D": "Formal charge = -2, Oxidation state = +2."
+      },
+      "correct_option": "A",
+      "distractor_misconceptions": {
+        "B": "formal_charge_vs_oxidation_state",
+        "C": "calculation_error",
+        "D": "electronegativity_charge_confusion"
+      },
+      "diagnostic_targets": [
+        "formal_charge_vs_oxidation_state"
+      ],
+      "explanation": "Formal charge assumes strictly equal sharing in all covalent bonds (FC = valence - nonbonding - bonds = 4 - 0 - 4 = 0). Oxidation state treats all bonds as 100% ionic, giving more electronegative oxygen both electrons per bond (Ox = +4)."
+    },
+    {
+      "id": "chem_bond_q10_metallic_bonding",
+      "concept": "Metallic Bonding Model",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Electron sea model and conductivity",
+      "difficulty": "easy",
+      "question_type": "standard",
+      "question_text": "Why do solid metals conduct electricity and heat so efficiently compared to solid covalent network crystals?",
+      "options": {
+        "A": "Because metal nuclei are mobile and migrate across the crystal lattice.",
+        "B": "Because valence electrons are delocalized into an 'electron sea' free to drift under an electric potential.",
+        "C": "Because metallic bonds are strictly covalent with alternating double bonds that conduct charge.",
+        "D": "Because metal atoms constantly ionize into gas-phase ions that carry current."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "ionic_covalent_binary",
+        "C": "intermolecular_intramolecular_conflation",
+        "D": "electronegativity_charge_confusion"
+      },
+      "diagnostic_targets": [
+        "ionic_covalent_binary"
+      ],
+      "explanation": "In metals, low ionization energy allows valence electrons to become delocalized over positive lattice cations, creating high electrical and thermal conductivity."
+    },
+    {
+      "id": "chem_bond_q11_molecular_polarity_symmetry",
+      "concept": "Dipole Moments & Molecular Symmetry",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Vector addition of bond dipoles",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "Carbon tetrachloride (CCl4) contains four highly polar C-Cl bonds (ΔEN = 0.6). Why is CCl4 as a whole completely nonpolar with a net dipole moment of zero?",
+      "options": {
+        "A": "Because chlorine's high electronegativity converts the bonds into nonpolar ionic bonds.",
+        "B": "Because the symmetrical tetrahedral geometry causes the four individual bond dipole vectors to cancel out completely.",
+        "C": "Because the carbon atom has zero formal charge.",
+        "D": "Because chlorine atoms repel each other and shut off dipole interactions."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "ionic_covalent_binary",
+        "C": "formal_charge_vs_oxidation_state",
+        "D": "lone_pair_no_repulsion"
+      },
+      "diagnostic_targets": [
+        "ionic_covalent_binary",
+        "electronegativity_charge_confusion"
+      ],
+      "explanation": "Molecular polarity depends on net dipole vector sum. In tetrahedral CCl4, identical C-Cl bond dipoles point symmetrically in 3D space, summing to zero net dipole."
+    },
+    {
+      "id": "chem_bond_q12_hydrogen_bonding_requirement",
+      "concept": "Hydrogen Bonding Criteria",
+      "topic": "Chemical Bonding",
+      "prerequisite": "High electronegativity and small atomic radius (N, O, F)",
+      "difficulty": "hard",
+      "question_type": "standard",
+      "question_text": "Both chlorine and nitrogen have a Pauling electronegativity of ~3.0. Why does ammonia (NH3) form strong hydrogen bonds, while hydrogen chloride (HCl) forms negligibly weak hydrogen bonds?",
+      "options": {
+        "A": "Because nitrogen has more valence electrons than chlorine.",
+        "B": "Because nitrogen has a much smaller atomic radius than chlorine, concentrating the partial negative charge into a dense, high-field lone pair.",
+        "C": "Because HCl is purely ionic and cannot engage in dipole attractions.",
+        "D": "Because chlorine atoms have an expanded octet that prevents hydrogen bonding."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "calculation_error",
+        "C": "ionic_covalent_binary",
+        "D": "octet_rule_absolute"
+      },
+      "diagnostic_targets": [
+        "intermolecular_intramolecular_conflation"
+      ],
+      "explanation": "Hydrogen bonding requires H covalently bonded to small, highly electronegative atoms (N, O, F). Chlorine's larger 3p electron cloud is too diffuse to generate the high localized charge density needed for strong hydrogen bonding."
+    },
+    {
+      "id": "chem_bond_q13_lattice_energy",
+      "concept": "Ionic Lattice Energy & Coulomb's Law",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Ionic radii and ionic charges",
+      "difficulty": "hard",
+      "question_type": "standard",
+      "question_text": "Comparing magnesium oxide (MgO: Mg2+, O2-) to sodium chloride (NaCl: Na+, Cl-), why is the melting point of MgO (2,852°C) dramatically higher than NaCl (801°C)?",
+      "options": {
+        "A": "Because MgO forms network covalent bonds like diamond.",
+        "B": "Because lattice energy is proportional to (q1 * q2) / r; the 2+ and 2- charges produce an attraction roughly four times stronger.",
+        "C": "Because magnesium has an incomplete octet in the solid state.",
+        "D": "Because sodium chloride contains volatile covalent molecules in its crystal lattice."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "ionic_covalent_binary",
+        "C": "octet_rule_absolute",
+        "D": "intermolecular_intramolecular_conflation"
+      },
+      "diagnostic_targets": [
+        "ionic_covalent_binary"
+      ],
+      "explanation": "According to Coulomb's Law, electrostatic attraction between ions scales with product of ionic charges (q1*q2). For MgO (2 * 2 = 4), lattice energy is ~4x that of NaCl (1 * 1 = 1)."
+    },
+    {
+      "id": "chem_bond_q14_resonance_hybrids",
+      "concept": "Resonance Structures & Delocalization",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Resonance hybrids vs oscillating bonds",
+      "difficulty": "medium",
+      "question_type": "standard",
+      "question_text": "In the nitrate ion (NO3-), experimental measurements reveal that all three N-O bonds have identical lengths (124 pm), intermediate between single and double bonds. What does this indicate?",
+      "options": {
+        "A": "The molecule rapidly vibrates back and forth between one double bond and two single bonds thousands of times per second.",
+        "B": "The true molecule is a single resonance hybrid where pi electrons are delocalized evenly across all three bonds simultaneously.",
+        "C": "Nitrogen has expanded its octet to accommodate three full double bonds.",
+        "D": "The bonds are purely ionic with electrostatic attraction on all sides."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "resonance_as_oscillation",
+        "C": "octet_rule_absolute",
+        "D": "ionic_covalent_binary"
+      },
+      "diagnostic_targets": [
+        "resonance_as_oscillation",
+        "octet_rule_absolute"
+      ],
+      "explanation": "Resonance structures are not oscillating physical states. The real molecule is an unchanging resonance hybrid with a uniform bond order of 1.33 for all three N-O bonds."
+    },
+    {
+      "id": "chem_bond_q15_bond_order_length_strength",
+      "concept": "Bond Order, Length, and Energy",
+      "topic": "Chemical Bonding",
+      "prerequisite": "Single, double, and triple bond comparisons",
+      "difficulty": "easy",
+      "question_type": "standard",
+      "question_text": "Comparing carbon-carbon single (C-C), double (C=C), and triple (C≡C) bonds, which sequence correctly ranks them in order of INCREASING bond strength (weakest to strongest)?",
+      "options": {
+        "A": "C≡C < C=C < C-C (triple bond is weakest because of electron repulsion).",
+        "B": "C-C < C=C < C≡C (single is weakest, triple is strongest).",
+        "C": "C=C < C-C < C≡C.",
+        "D": "All three have equal bond energy because they link identical carbon atoms."
+      },
+      "correct_option": "B",
+      "distractor_misconceptions": {
+        "A": "calculation_error",
+        "C": "calculation_error",
+        "D": "ionic_covalent_binary"
+      },
+      "diagnostic_targets": [
+        "calculation_error"
+      ],
+      "explanation": "Higher bond order increases shared electron density between nuclei, pulling nuclei closer together and resulting in shorter and significantly stronger bonds."
+    }
+  ]
+}

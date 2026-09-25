@@ -1,0 +1,149 @@
+{
+  "title": "Same Score. Different Misconception.",
+  "subtitle": "Two students make the exact same mistake on the same question, but harbor fundamentally divergent cognitive models.",
+  "initial_question": {
+    "id": "physics_newton_q01",
+    "concept": "Newton's First Law",
+    "topic": "Newton's Laws",
+    "question_text": "A deep-space probe is coasting at a constant velocity of 20,000 km/h far from any gravitational source, with its propulsion engines turned off. What is the net external force acting on the probe?",
+    "options": {
+      "A": "A continuous forward net force proportional to the probe's mass multiplied by its speed.",
+      "B": "Zero net force.",
+      "C": "A small continuous forward force required to actively overcome cosmic inertia.",
+      "D": "A backward resistive force equal to its momentum."
+    },
+    "correct_option": "B"
+  },
+  "shared_result": {
+    "score": "0 / 1",
+    "accuracy": "0%",
+    "summary": "Both students fail the question. A traditional grading system treats them identically (Score: 0). The diagnostic engine inspects their distinct distractor selections to isolate competing cognitive models."
+  },
+  "student_a": {
+    "student_id": "student_alex_01",
+    "name": "Student A (Alex)",
+    "initial_attempt": {
+      "selected_option": "A",
+      "selected_text": "A continuous forward net force proportional to the probe's mass multiplied by its speed.",
+      "confidence": 5,
+      "is_correct": false,
+      "distractor_signal": "force_acceleration_confusion",
+      "observation": "High confidence (5/5) belief that constant velocity requires sustained forward propulsion."
+    },
+    "competing_hypotheses": [
+      {
+        "id": "force_acceleration_confusion",
+        "label": "Force Required for Motion (Impetus)",
+        "probability": 0.55
+      },
+      {
+        "id": "mass_inertia_resistance",
+        "label": "Inertia as Active Resistance",
+        "probability": 0.25
+      },
+      {
+        "id": "action_reaction_cancellation",
+        "label": "Action-Reaction Cancellation",
+        "probability": 0.20
+      }
+    ],
+    "diagnostic_probe": {
+      "id": "physics_newton_diag_01",
+      "question_text": "A hockey puck is given a swift horizontal push across perfectly frictionless ice. Immediately after the player's stick loses physical contact with the puck, which horizontal forces continue to act on the puck as it glides?",
+      "selected_option": "A",
+      "selected_text": "The forward pushing force imparted by the stick remains stored in the puck keeping it moving.",
+      "confidence": 4,
+      "observation": "Reaffirms impetus intuition: believes force is stored in moving objects to sustain motion."
+    },
+    "diagnosis": {
+      "confirmed": true,
+      "misconception_id": "force_acceleration_confusion",
+      "label": "Force Required for Motion (Impetus Theory)",
+      "probability": 0.76,
+      "probability_gap": 0.52,
+      "reasoning": "Alex consistently assumes that constant velocity requires a continuous forward force. This is the classic Aristotelian 'impetus' misconception.",
+      "alternatives": [
+        { "name": "Inertia as Active Resistance", "probability": 0.14 },
+        { "name": "Action-Reaction Cancellation", "probability": 0.10 }
+      ]
+    },
+    "remediation": {
+      "title": "Separating Velocity from Acceleration",
+      "text": "In Newtonian mechanics, net force does NOT cause velocity; net force causes a CHANGE in velocity (acceleration, F = ma). Once an object is in motion, zero net force is needed to keep it moving at constant velocity in frictionless space.",
+      "example": "When a spacecraft engine fires, it accelerates. When the engine cuts off, it does not stop or slow down; it glides at that exact speed forever.",
+      "key_takeaway": "No force is needed to sustain constant velocity."
+    },
+    "verification": {
+      "id": "physics_newton_verify_01",
+      "question_text": "An elevator cab of mass 1,000 kg is moving vertically UPWARD at a steady, constant speed of 3.0 m/s. Comparing upward cable tension (T) to downward weight (W = mg):",
+      "selected_option": "B",
+      "selected_text": "T is exactly equal to W because acceleration is zero.",
+      "status": "resolved",
+      "explanation": "Alex correctly recognized that constant velocity implies zero acceleration (a = 0), so net force is zero and T = W. The impetus misconception is successfully resolved."
+    }
+  },
+  "student_b": {
+    "student_id": "student_beth_02",
+    "name": "Student B (Beth)",
+    "initial_attempt": {
+      "selected_option": "C",
+      "selected_text": "A small continuous forward force required to actively overcome cosmic inertia.",
+      "confidence": 5,
+      "is_correct": false,
+      "distractor_signal": "mass_inertia_resistance",
+      "observation": "High confidence (5/5) belief that inertia is an active counter-force that drains kinetic energy."
+    },
+    "competing_hypotheses": [
+      {
+        "id": "mass_inertia_resistance",
+        "label": "Inertia as Active Resistance",
+        "probability": 0.56
+      },
+      {
+        "id": "force_acceleration_confusion",
+        "label": "Force Required for Motion (Impetus)",
+        "probability": 0.24
+      },
+      {
+        "id": "action_reaction_cancellation",
+        "label": "Action-Reaction Cancellation",
+        "probability": 0.20
+      }
+    ],
+    "diagnostic_probe": {
+      "id": "physics_newton_diag_02",
+      "question_text": "An astronaut in a zero-gravity environment nudges a massive 500 kg crate so it drifts toward a docking bay at 0.5 m/s. While drifting, why does the crate require zero propulsion to keep coasting?",
+      "selected_option": "C",
+      "selected_text": "Because the crate's internal inertia force pushes back against empty space to maintain speed.",
+      "confidence": 4,
+      "observation": "Reaffirms that inertia is viewed as an active opposing force or resistance that must be countered."
+    },
+    "diagnosis": {
+      "confirmed": true,
+      "misconception_id": "mass_inertia_resistance",
+      "label": "Inertia as Active Resistance",
+      "probability": 0.74,
+      "probability_gap": 0.48,
+      "reasoning": "Beth understands that objects keep moving, but treats 'inertia' as an active opposing force that must be continuously countered, rather than passive mass.",
+      "alternatives": [
+        { "name": "Force Required for Motion", "probability": 0.16 },
+        { "name": "Action-Reaction Cancellation", "probability": 0.10 }
+      ]
+    },
+    "remediation": {
+      "title": "Inertia is Mass, Not a Force",
+      "text": "Inertia is not a force that resists motion; it is merely an object's mass—the passive reluctance to change velocity. Mass does not fight against existing motion; it only resists acceleration.",
+      "example": "A 10,000 kg asteroid moving through space requires zero energy to keep moving. Inertia does not slow it down.",
+      "key_takeaway": "Inertia is a property of matter (mass), not an active physical force."
+    },
+    "verification": {
+      "id": "physics_newton_verify_02",
+      "question_text": "In deep space, two identical frictionless spheres, Sphere X (mass 1 kg) and Sphere Y (mass 100 kg), are both coasting at the same constant speed of 5 m/s. How do the net external forces acting on Sphere X and Sphere Y compare?",
+      "selected_option": "A",
+      "selected_text": "Sphere Y requires 100 times more continuous net force to overcome its greater inertia.",
+      "status": "persistent",
+      "explanation": "Beth selected the mass-dependent distractor, revealing that the belief that higher mass requires continuous force to overcome inertia remains persistent. Targeted revision interval scheduled."
+    }
+  },
+  "key_takeaway": "Same wrong answer ≠ same misconception. Traditional MCQ scoring gives both students 0/1, masking fundamentally divergent cognitive models that require distinct pedagogical interventions."
+}
