@@ -82,10 +82,10 @@ Respond ONLY with a JSON object in this exact schema:
   "remediation_title": "Engaging Short Title",
   "remediation_text": "Clear explanation of the conceptual misunderstanding and the correct principle.",
   "differences": [
-    {
+    {{
       "misconception_aspect": "What the intuition says",
       "reality_aspect": "What the science actually says"
-    }
+    }}
   ],
   "example": "A memorable real-world analogy or counter-intuitive thought experiment.",
   "key_takeaway": "A concise one-sentence rule the student can apply immediately.",

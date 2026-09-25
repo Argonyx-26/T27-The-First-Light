@@ -227,7 +227,7 @@ describe("ExamSetupPage UI", () => {
 
     expect(screen.getByText(/Adaptive Exam Mode/i)).toBeInTheDocument();
     expect(screen.getByText(/Enter Exam Topic/i)).toBeInTheDocument();
-    expect(screen.getByText(/Data Structures & Algorithms/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Search for a topic to take a quiz/i)).toBeInTheDocument();
     expect(screen.getByText(/Number of Questions/i)).toBeInTheDocument();
     expect(screen.getByText(/Start Timed Exam/i)).toBeInTheDocument();
   });
