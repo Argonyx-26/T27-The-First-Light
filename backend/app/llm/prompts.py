@@ -71,17 +71,27 @@ Observed Student Evidence:
 
 Provide targeted remediation to repair this specific mental model.
 Explain *why* the student's intuition feels right in daily experience, but *why* it fails in science, and give an intuitive analogy. Ground your explanation in the reference material when provided.
+You MUST provide a clear, step-by-step comparison highlighting the differences between the Misconception and the Actual Concept.
 Also provide a Feynman Technique breakdown: explain the idea as if teaching a bright 12-year-old, using zero jargon and crystal-clear everyday comparisons.
+
+You MUST provide a `visual_artifact_svg` containing a raw, valid, standalone SVG string (no markdown backticks around it). The SVG should draw a neat flowchart or comparison diagram illustrating the Misconception vs the Actual Concept. Ensure it has a white/transparent background and clear text. IMPORTANT: Since this SVG is inside a JSON string, you MUST either escape all double quotes within the SVG (e.g. \") or use single quotes for all SVG attributes (e.g. viewBox='0 0 100 100').
 
 Respond ONLY with a JSON object in this exact schema:
 {{
   "misconception_id": "{misconception_id}",
   "remediation_title": "Engaging Short Title",
   "remediation_text": "Clear explanation of the conceptual misunderstanding and the correct principle.",
+  "differences": [
+    {
+      "misconception_aspect": "What the intuition says",
+      "reality_aspect": "What the science actually says"
+    }
+  ],
   "example": "A memorable real-world analogy or counter-intuitive thought experiment.",
   "key_takeaway": "A concise one-sentence rule the student can apply immediately.",
   "check_for_understanding": "A short self-reflective question prompting the student to verify their new understanding.",
-  "feynman_explanation": "Feynman Technique explanation: explain simply to a 12-year-old using clear everyday analogies and zero technical jargon."
+  "feynman_explanation": "Feynman Technique explanation: explain simply to a 12-year-old using clear everyday analogies and zero technical jargon.",
+  "visual_artifact_svg": "<svg xmlns='http://www.w3.org/2000/svg' ...>...</svg>"
 }}
 """
 
@@ -136,7 +146,7 @@ Target Misconceptions to address in the distractors:
 {target_misconceptions}
 
 Requirements:
-- Exactly 4 options: A, B, C, D.
+- Exactly 4 options: A, B, C, D. NEVER include 'Correct Option' or any extra keys inside the 'options' dictionary.
 - Exactly one unequivocally correct option.
 - Each of the 3 incorrect options (distractors) MUST map to a specific named misconception.
 - Clear, unambiguous phrasing.

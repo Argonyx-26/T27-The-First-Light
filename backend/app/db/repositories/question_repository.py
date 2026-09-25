@@ -48,7 +48,8 @@ def list_questions(
     if question_type:
         query = query.filter(QuestionModel.question_type == question_type)
 
-    models = query.limit(limit).all()
+    from sqlalchemy.sql.expression import func
+    models = query.order_by(func.random()).limit(limit).all()
     return [model_to_question(m) for m in models]
 
 

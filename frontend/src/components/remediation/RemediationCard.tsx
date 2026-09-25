@@ -165,6 +165,34 @@ export const RemediationCard: React.FC<RemediationCardProps> = ({
           </div>
         </div>
 
+        {/* Differences / Comparison Table */}
+        {remediation.differences && remediation.differences.length > 0 && (
+          <div className="space-y-2 mt-4">
+            <h4 className="text-xs uppercase font-bold tracking-wider text-indigo-900 flex items-center">
+              <CheckCircle2 className="w-3.5 h-3.5 mr-1.5 text-indigo-600" />
+              Misconception vs. Reality
+            </h4>
+            <div className="rounded-xl border border-border/80 overflow-hidden bg-white shadow-sm">
+              <div className="grid grid-cols-2 bg-slate-100 border-b border-border/80 text-xs font-bold uppercase tracking-wider text-slate-700">
+                <div className="p-3 border-r border-border/80 text-rose-700">What You Might Think</div>
+                <div className="p-3 text-emerald-700">What Actually Happens</div>
+              </div>
+              <div className="divide-y divide-border/60">
+                {remediation.differences.map((diff, idx) => (
+                  <div key={idx} className="grid grid-cols-2 text-sm">
+                    <div className="p-4 border-r border-border/80 bg-rose-50/30 text-rose-900">
+                      {diff.misconception_aspect}
+                    </div>
+                    <div className="p-4 bg-emerald-50/30 text-emerald-900 font-medium">
+                      {diff.reality_aspect}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Real-World Analogy / Example */}
         {remediation.example && (
           <div className="space-y-2">

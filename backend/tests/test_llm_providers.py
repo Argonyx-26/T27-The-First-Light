@@ -7,8 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from app.llm.base import LLMProvider, LLMProviderError
 from app.llm.client import LLMClient
-from app.llm.gemini_provider import GeminiProvider
-from app.llm.groq_provider import GroqProvider
+from app.llm.openrouter_provider import OpenRouterPoolProvider
 from app.llm.mock_provider import MockProvider
 from app.llm.schemas import (
     HypothesisProposalResponse,
@@ -67,44 +66,39 @@ async def test_mock_provider_returns_deterministic_responses():
 
 
 @pytest.mark.anyio
-async def test_groq_success_path():
+async def test_openrouter_success_path():
     success_json = '{"hypotheses": [{"id": "h1", "label": "L1", "initial_probability": 0.5, "predicted_wrong_options": ["A"], "reason": "R"}]}'
-    groq_mock = DummySuccessProvider("groq", success_json)
-    gemini_mock = DummyFailingProvider("gemini")
-
-    client = LLMClient(primary_provider=groq_mock, fallback_provider=gemini_mock, force_mode="live")
+    
+    client = LLMClient(force_mode="live")
+    client.diagnostic_provider = DummySuccessProvider("openrouter", success_json)
+    
     result = await client.complete("test prompt")
 
-    assert result.provider == "groq"
+    assert result.provider == "openrouter"
     assert result.content == success_json
 
 
 @pytest.mark.anyio
-async def test_groq_failure_triggers_gemini_fallback():
-    groq_mock = DummyFailingProvider("groq")
-    gemini_json = '{"remediation_title": "T", "remediation_text": "Text", "key_takeaway": "K"}'
-    gemini_mock = DummySuccessProvider("gemini", gemini_json)
-
-    client = LLMClient(primary_provider=groq_mock, fallback_provider=gemini_mock, force_mode="live")
-    result = await client.complete("test prompt")
-
-    # Primary failed, fallback succeeded!
-    assert result.provider == "gemini"
-    assert result.content == gemini_json
+async def test_openrouter_failure_triggers_mock_fallback():
+    client = LLMClient(force_mode="live")
+    client.diagnostic_provider = DummyFailingProvider("openrouter")
+    
+    with patch("app.core.config.settings.ENVIRONMENT", "development"):
+        result = await client.complete("test prompt")
+        assert result.provider == "mock"
 
 
 @pytest.mark.anyio
-async def test_both_providers_fail_in_strict_mode():
-    groq_mock = DummyFailingProvider("groq")
-    gemini_mock = DummyFailingProvider("gemini")
+async def test_openrouter_failure_in_strict_mode():
+    client = LLMClient(force_mode="live")
+    client.diagnostic_provider = DummyFailingProvider("openrouter")
 
-    # In production mode without keys, should raise 502 error
+    # In production mode with keys, should raise error instead of fallback to mock
     with patch("app.core.config.settings.ENVIRONMENT", "production"), \
-         patch("app.core.config.settings.GROQ_API_KEY", "real_key"):
-        client = LLMClient(primary_provider=groq_mock, fallback_provider=gemini_mock, force_mode="live")
+         patch("app.core.config.settings.OPEN_ROUTER_API", "real_key"):
         with pytest.raises(LLMProviderError) as exc_info:
             await client.complete("test prompt")
-        assert exc_info.value.status_code == 502
+        assert exc_info.value.status_code == 503
 
 
 @pytest.mark.anyio

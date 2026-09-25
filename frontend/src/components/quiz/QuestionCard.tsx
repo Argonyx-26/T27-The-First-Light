@@ -25,17 +25,23 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   correctOption,
 }) => {
   const isDiagnostic = question.question_type === "diagnostic" || question.id.includes("diag");
+  const isFollowUp = question.question_type === "followup";
   const resolvedCorrectOption = correctOption || question.correct_option;
 
   return (
-    <Card className="border border-border/80 shadow-subtle overflow-hidden bg-card">
-      <CardHeader className="bg-slate-50/50 border-b border-border/50 pb-4">
+    <Card className={cn("border shadow-subtle overflow-hidden bg-card", isFollowUp ? "border-indigo-300 ring-1 ring-indigo-200" : "border-border/80")}>
+      <CardHeader className={cn("border-b pb-4", isFollowUp ? "bg-indigo-50/40 border-indigo-100" : "bg-slate-50/50 border-border/50")}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
             <Badge variant="secondary" className="font-medium text-xs bg-white border border-border">
               {question.concept}
             </Badge>
-            {isDiagnostic ? (
+            {isFollowUp ? (
+              <Badge variant="diagnostic" className="flex items-center space-x-1 bg-indigo-100 text-indigo-700 border-indigo-300 hover:bg-indigo-200">
+                <Sparkles className="w-3 h-3" />
+                <span className="font-bold">Follow-Up Question</span>
+              </Badge>
+            ) : isDiagnostic ? (
               <Badge variant="diagnostic" className="flex items-center space-x-1">
                 <Sparkles className="w-3 h-3" />
                 <span>Diagnostic Evidence Probe</span>
@@ -52,11 +58,15 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
           </span>
         </div>
 
-        {isDiagnostic && (
-          <p className="text-xs text-indigo-700 mt-2 font-medium bg-indigo-50/70 p-2 rounded border border-indigo-100/60">
-            Targeted follow-up question to test specific mental models and isolate any misconceptions.
+        {isFollowUp ? (
+          <p className="text-sm text-indigo-800 mt-3 font-semibold bg-indigo-100/70 p-3 rounded-md border border-indigo-200">
+            Based on your previous answer, please answer this follow-up question to help us pinpoint your mental model.
           </p>
-        )}
+        ) : isDiagnostic ? (
+          <p className="text-xs text-indigo-700 mt-2 font-medium bg-indigo-50/70 p-2 rounded border border-indigo-100/60">
+            Targeted diagnostic question to test specific mental models and isolate any misconceptions.
+          </p>
+        ) : null}
       </CardHeader>
 
       <CardContent className="pt-6 space-y-6">
@@ -67,7 +77,9 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 
         {/* Options */}
         <div className="space-y-3">
-          {Object.entries(question.options).map(([key, text]) => {
+          {Object.entries(question.options)
+            .filter(([key]) => ["A", "B", "C", "D"].includes(key.trim().toUpperCase()))
+            .map(([key, text]) => {
             const isSelected = selectedOption === key;
             const isThisCorrect = isSubmitted && resolvedCorrectOption === key;
             const isThisIncorrectSelection = isSubmitted && isSelected && !isCorrect;

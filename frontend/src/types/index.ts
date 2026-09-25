@@ -152,6 +152,7 @@ export interface RemediationResponse {
   misconception_id: string;
   remediation_title?: string | null;
   remediation_text: string;
+  differences?: { misconception_aspect: string; reality_aspect: string }[];
   example?: string | null;
   key_takeaway?: string | null;
   check_for_understanding?: string | null;

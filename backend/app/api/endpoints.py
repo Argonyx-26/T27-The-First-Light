@@ -119,11 +119,19 @@ if str(root_dir) not in sys.path:
 if "rag" in sys.modules and not hasattr(sys.modules["rag"], "__file__"):
     sys.modules.pop("rag", None)
 
-from rag.retrieval.retriever import default_rag_retriever
-from rag.ingestion.pipeline import default_ingestion_pipeline
-from rag.ingestion.pdf_loader import DocumentLoader
-from rag.storage.chroma import default_chroma_store
-from rag.schemas import DocumentChunk, RetrievedChunk
+try:
+    from rag.retrieval.retriever import default_rag_retriever
+    from rag.ingestion.pipeline import default_ingestion_pipeline
+    from rag.ingestion.pdf_loader import DocumentLoader
+    from rag.storage.chroma import default_chroma_store
+    from rag.schemas import DocumentChunk, RetrievedChunk
+except ImportError:
+    default_rag_retriever = None
+    default_ingestion_pipeline = None
+    DocumentLoader = None
+    default_chroma_store = None
+    DocumentChunk = None
+    RetrievedChunk = None
 
 
 logger = logging.getLogger(__name__)
@@ -391,7 +399,7 @@ async def generate_quiz(
     questions = question_repo.list_questions(db, topic=req.topic, limit=req.count)
 
     # If topic does not have enough stored questions and Groq is active, generate via Groq
-    if len(questions) < req.count and (settings.GROQ_API_KEY or llm_client.mode == "live"):
+    if len(questions) < req.count and (settings.OPEN_ROUTER_API or settings.OPENROUTER_API_KEY or llm_client.mode == "live"):
         try:
             needed = req.count - len(questions)
             for _ in range(needed):
@@ -470,7 +478,7 @@ async def submit_answer(
     # ==========================================================================
     # Scenario A: Student is CORRECT
     # ==========================================================================
-    if is_correct:
+    if is_correct and session.status != "diagnosing":
         new_mastery = min(1.0, round(session.mastery_score + 0.25, 2))
         session_repo.update_session(db, req.session_id, mastery_score=new_mastery)
 
@@ -501,13 +509,13 @@ async def submit_answer(
         )
 
     # ==========================================================================
-    # Scenario B: Student is INCORRECT -> Initiate or Continue Adaptive Diagnosis
+    # Scenario B: Student is INCORRECT (or answering Diagnostic) -> Adaptive Diagnosis
     # ==========================================================================
     misc_repo.record_evidence(
         db=db,
         session_id=req.session_id,
         question_id=question.id,
-        signal="distractor_match" if matched_misconception_id else "incorrect_response",
+        signal="distractor_match" if matched_misconception_id else ("correct_response" if is_correct else "incorrect_response"),
         observation=f"Selected Option {req.selected_option} with confidence {req.confidence}/5.",
     )
 
@@ -541,92 +549,84 @@ async def submit_answer(
     # Persist updated hypothesis distribution
     misc_repo.save_or_update_hypotheses(db, req.session_id, updated_hyps, status="candidate")
 
-    # Evaluate confirmation threshold gate: P > 0.60 AND gap >= 0.20
-    gate_result = check_confirmation_gate(updated_hyps)
     ranked = rank_hypotheses(updated_hyps)
-    top_p = ranked[0].probability if ranked else 0.0
-    runner_p = ranked[1].probability if len(ranked) > 1 else 0.0
-    gap = top_p - runner_p if len(ranked) > 1 else top_p
-    logger.info(
-        "[Hypothesis Engine] Session %s, Q: %s, Opt: %s (conf: %d) -> Weights: %s | Gate: eligible=%s (top_P=%.4f > 0.60, gap=%.4f >= 0.20)",
-        req.session_id,
-        req.question_id,
-        req.selected_option,
-        req.confidence,
-        [(h.id, round(h.probability, 4)) for h in ranked],
-        gate_result.is_eligible,
-        top_p,
-        gap,
-    )
+
+    # === NEW LOGIC TO FORCE EXACTLY 2 FOLLOW UPS ===
+    from app.engine.models import Hypothesis
+    
+    stored_evidence = misc_repo.get_session_evidence(db, req.session_id)
+    diag_count = len(stored_evidence)
+    
+    is_eligible = False
+    top_h = None
+    if diag_count >= 3:
+        is_eligible = True
+        
+        # Check if they got the last two follow-up questions correct
+        # To determine if it was just a minor confusion
+        from app.db.models import AttemptModel
+        attempts = db.query(AttemptModel).filter(AttemptModel.session_id == req.session_id).order_by(AttemptModel.id.desc()).limit(2).all()
+        if len(attempts) == 2 and all(a.is_correct for a in attempts):
+            top_h = Hypothesis(
+                id="no_misconception", 
+                label="Minor Confusion", 
+                probability=1.0, 
+                description="You answered both follow-ups correctly. You just got a little confused on the initial question!"
+            )
+        else:
+            top_h = ranked[0] if ranked else Hypothesis(id="unknown", label="Unknown", probability=1.0)
+    # ================================================
 
     # ==========================================================================
-    # Scenario C: Candidate Eligible for Confirmation -> Self-Consistency Check
+    # Scenario C: Candidate Eligible for Confirmation (Exactly 2 follow-ups reached)
     # ==========================================================================
-    if gate_result.is_eligible and gate_result.top_hypothesis:
-        top_h = gate_result.top_hypothesis
-
-        # Run self-consistency simulation check
-        consistency_eval = await self_consistency_svc.verify_hypothesis_consistency(
-            candidate=top_h,
-            question=question,
-            actual_student_option=req.selected_option,
-        )
-
-        misc_repo.record_evidence(
+    if is_eligible and top_h:
+        # Application code makes the final decision directly based on rule
+        session_repo.update_session(
             db=db,
             session_id=req.session_id,
-            question_id=question.id,
-            signal="consistency_confirmed" if consistency_eval.is_consistent else "consistency_diverged",
-            observation=consistency_eval.summary,
+            status="confirmed",
+            active_misconception_id=top_h.id,
+        )
+        misc_repo.update_misconception_status(db, req.session_id, top_h.id, "confirmed")
+
+        # Collect stored evidence trail
+        stored_evidence = misc_repo.get_session_evidence(db, req.session_id)
+        evidence_items = [
+            EvidenceItem(
+                step=e.step_index,
+                question_id=e.question_id,
+                observation=e.observation,
+                signal=e.signal,
+            )
+            for e in stored_evidence
+        ]
+
+        # Collect alternative hypotheses
+        alternatives = [
+            AlternativeHypothesis(name=h.label, probability=round(h.probability, 4))
+            for h in ranked[1:]
+        ]
+
+        diagnosis_summary = DiagnosisSummary(
+            confirmed=True,
+            primary_misconception=PrimaryMisconceptionDiagnosis(
+                id=top_h.id,
+                name=top_h.label,
+                description=top_h.description,
+                confidence_score=round(top_h.probability, 4),
+            ),
+            evidence=evidence_items,
+            alternatives=alternatives,
         )
 
-        # Application code makes the final decision
-        if consistency_eval.application_decision == "CONFIRMED":
-            session_repo.update_session(
-                db=db,
-                session_id=req.session_id,
-                status="confirmed",
-                active_misconception_id=top_h.id,
-            )
-            misc_repo.update_misconception_status(db, req.session_id, top_h.id, "confirmed")
-
-            # Collect stored evidence trail
-            stored_evidence = misc_repo.get_session_evidence(db, req.session_id)
-            evidence_items = [
-                EvidenceItem(
-                    step=e.step_index,
-                    question_id=e.question_id,
-                    observation=e.observation,
-                    signal=e.signal,
-                )
-                for e in stored_evidence
-            ]
-
-            # Collect alternative hypotheses
-            alternatives = [
-                AlternativeHypothesis(name=h.label, probability=round(h.probability, 4))
-                for h in ranked[1:]
-            ]
-
-            diagnosis_summary = DiagnosisSummary(
-                confirmed=True,
-                primary_misconception=PrimaryMisconceptionDiagnosis(
-                    id=top_h.id,
-                    name=top_h.label,
-                    description=top_h.description,
-                    confidence_score=round(top_h.probability, 4),
-                ),
-                evidence=evidence_items,
-                alternatives=alternatives,
-            )
-
-            return SubmitAnswerResponse(
-                session_id=req.session_id,
-                status="confirmed",
-                evaluation="incorrect",
-                active_hypotheses=updated_hyps,
-                diagnosis=diagnosis_summary,
-            )
+        return SubmitAnswerResponse(
+            session_id=req.session_id,
+            status="confirmed",
+            evaluation="incorrect",
+            active_hypotheses=updated_hyps,
+            diagnosis=diagnosis_summary,
+        )
 
     # ==========================================================================
     # Scenario D: Diagnosis Continues -> Deterministic Question Selection
@@ -653,6 +653,7 @@ async def submit_answer(
                 concept=question.concept,
                 difficulty="medium",
                 target_misconceptions=target_misc_desc,
+                is_followup=True,
             )
             if next_q:
                 question_repo.save_question(db, next_q)
@@ -719,6 +720,19 @@ async def remediate(
     session = session_repo.get_session(db, req.session_id)
     if not session:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Session '{req.session_id}' not found.")
+
+    if req.misconception_id == "no_misconception":
+        return RemediateResponse(
+            misconception_id="no_misconception",
+            remediation_title="Minor Confusion, Not a Misconception!",
+            remediation_text="You answered both follow-up questions correctly! It looks like you just made a simple mistake on the initial question rather than having a deep conceptual misunderstanding. Your foundation is solid!",
+            example=None,
+            key_takeaway="Always double-check your initial intuition.",
+            check_for_understanding=None,
+            feynman_explanation="Sometimes we just slip up on a small detail even if we know the big picture. Since you nailed the follow-ups, you're good to go!",
+            visual_artifact_svg=None,
+            video_snippet=None,
+        )
 
     # Find misconception metadata
     hyps = misc_repo.get_session_hypotheses(db, req.session_id)

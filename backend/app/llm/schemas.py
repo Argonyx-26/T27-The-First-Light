@@ -41,6 +41,7 @@ class RemediationResponse(BaseModel):
     misconception_id: str = Field(..., description="ID of the addressed misconception")
     remediation_title: Optional[str] = Field(default=None, description="Engaging, encouraging title")
     remediation_text: str = Field(..., description="Clear explanation of the conceptual misunderstanding and the correct principle")
+    differences: Optional[list[dict[str, str]]] = Field(default=None, description="List of dicts with 'misconception_aspect' and 'reality_aspect'")
     example: Optional[str] = Field(default=None, description="Intuitive physical analogy or counter-example")
     key_takeaway: Optional[str] = Field(default=None, description="Memorable summary rule")
     check_for_understanding: Optional[str] = Field(default=None, description="Reflective question prompting self-check")

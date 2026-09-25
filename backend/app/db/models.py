@@ -65,6 +65,7 @@ class AttemptModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     session = relationship("SessionModel", back_populates="attempts")
+    question = relationship("QuestionModel")
 
 
 class MisconceptionStateModel(Base):

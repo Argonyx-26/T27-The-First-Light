@@ -21,26 +21,19 @@ class Settings(BaseSettings):
     # Mode can be "live" (uses Groq/Gemini APIs) or "mock" (offline deterministic fixtures)
     LLM_MODE: str = "live"
 
-    # Primary LLM: Groq (Questions & Distractors)
-    GROQ_API_KEY: Optional[str] = None
-    GROQ_MODEL: str = "openai/gpt-oss-120b"
-    GROQ_API_URL: str = "https://api.groq.com/openai/v1/chat/completions"
+    # OpenRouter API (Comma separated keys)
+    OPEN_ROUTER_API: Optional[str] = None
+    OPENROUTER_API_KEY: Optional[str] = None # Fallback alias
 
-    # Remediation & Multimodal Vision: Google Gemini
-    GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
-    GEMINI_API_URL: str = "https://generativelanguage.googleapis.com/v1beta/models"
+    OPENROUTER_DIAGNOSTIC_MODEL: str = "qwen/qwen3.8-flash"
+    OPENROUTER_REMEDIATION_MODEL: str = "google/gemini-2.5-flash"
+    OPENROUTER_API_URL: str = "https://openrouter.ai/api/v1/chat/completions"
 
     # YouTube Data API v3 (Educational Video Retrieval)
     YOUTUBE_API_KEY: Optional[str] = None
 
     # CORS
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-    ]
+    CORS_ORIGINS: List[str] = ["*"]
 
     model_config = SettingsConfigDict(
         env_file=(".env", "backend/.env", "../.env"),

@@ -73,9 +73,6 @@ export const Navbar: React.FC = () => {
                 </span>
               )}
             </div>
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-              {isTeacherMode ? "Cohort Learning Analytics" : "Diagnostic Learning"}
-            </span>
           </div>
         </Link>
 
@@ -98,8 +95,8 @@ export const Navbar: React.FC = () => {
                 className={cn(
                   "flex items-center space-x-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-secondary text-slate-900 font-semibold shadow-xs"
-                    : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
+                    ? "bg-accent/20 text-indigo-950 font-semibold shadow-xs"
+                    : "text-muted-foreground hover:bg-accent/10 hover:text-foreground",
                   link.highlight && "text-indigo-600 hover:text-indigo-700 font-semibold"
                 )}
               >

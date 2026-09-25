@@ -16,13 +16,12 @@ async def lifespan(app: FastAPI):
     # Startup: Log key detection securely without logging secret values
     import logging
     logger = logging.getLogger("uvicorn.info")
-    groq_detected = bool(settings.GROQ_API_KEY and settings.GROQ_API_KEY.strip())
-    gemini_detected = bool(settings.GEMINI_API_KEY and settings.GEMINI_API_KEY.strip())
+    api_keys_str = settings.OPEN_ROUTER_API or settings.OPENROUTER_API_KEY
+    openrouter_keys = [k for k in (api_keys_str or "").split(",") if k.strip()]
     youtube_detected = bool(settings.YOUTUBE_API_KEY and settings.YOUTUBE_API_KEY.strip())
     logger.info(
-        "API Key Detection: GROQ_API_KEY detected=%s, GEMINI_API_KEY detected=%s, YOUTUBE_API_KEY detected=%s",
-        groq_detected,
-        gemini_detected,
+        "API Key Detection: OPEN_ROUTER_API pool size=%d, YOUTUBE_API_KEY detected=%s",
+        len(openrouter_keys),
         youtube_detected,
     )
 
@@ -47,7 +46,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -9,8 +9,7 @@ from typing import Any, Dict, List, Optional
 from app.core.config import settings
 from app.engine.models import Question
 from app.llm.base import LLMProvider, LLMProviderError
-from app.llm.gemini_provider import GeminiProvider
-from app.llm.groq_provider import GroqProvider
+from app.llm.openrouter_provider import OpenRouterPoolProvider
 from app.llm.mock_provider import MockProvider
 from app.llm.prompts import (
     SYSTEM_PROMPT_HYPOTHESIS_GENERATION,
@@ -72,7 +71,8 @@ async def search_youtube_video(topic: str, misconception_label: str) -> Optional
     import httpx
 
     if settings.YOUTUBE_API_KEY and settings.YOUTUBE_API_KEY.strip():
-        query = f"{topic} {misconception_label} concept tutorial"
+        # Focus query on topic domain tutorial
+        query = f"{topic} educational tutorial crashcourse"
         url = "https://www.googleapis.com/youtube/v3/search"
         params = {
             "part": "snippet",
@@ -80,7 +80,7 @@ async def search_youtube_video(topic: str, misconception_label: str) -> Optional
             "type": "video",
             "videoEmbeddable": "true",
             "key": settings.YOUTUBE_API_KEY.strip(),
-            "maxResults": 1,
+            "maxResults": 3,
             "safeSearch": "moderate",
         }
         try:
@@ -89,19 +89,23 @@ async def search_youtube_video(topic: str, misconception_label: str) -> Optional
                 if resp.status_code == 200:
                     data = resp.json()
                     items = data.get("items", [])
-                    if items and "id" in items[0] and "videoId" in items[0]["id"]:
-                        item = items[0]
-                        vid_id = item["id"]["videoId"]
-                        snip = item.get("snippet", {})
-                        title = snip.get("title", f"{topic} Breakdown")
-                        desc = snip.get("description", f"Concept tutorial covering {topic} and {misconception_label}.")
-                        return VideoSnippet(
-                            title=title,
-                            youtube_video_id=vid_id,
-                            start_seconds=0,
-                            end_seconds=180,
-                            concept_summary=desc[:200] if desc else f"Tutorial addressing {misconception_label}.",
-                        )
+                    # Verify topic relevance: at least one word from topic must appear
+                    topic_words = [w.lower() for w in topic.split() if len(w) > 3 and w.lower() not in ["what", "when", "with", "from", "about", "laws", "into"]]
+                    for item in items:
+                        if "id" in item and "videoId" in item["id"]:
+                            vid_id = item["id"]["videoId"]
+                            snip = item.get("snippet", {})
+                            title = snip.get("title", f"{topic} Breakdown")
+                            desc = snip.get("description", f"Tutorial covering {topic}.")
+                            combined_text = f"{title} {desc}".lower()
+                            if not topic_words or all(w in combined_text for w in topic_words):
+                                return VideoSnippet(
+                                    title=title,
+                                    youtube_video_id=vid_id,
+                                    start_seconds=0,
+                                    end_seconds=180,
+                                    concept_summary=desc[:200] if desc else f"Tutorial addressing {topic}.",
+                                )
                 else:
                     logger.warning("YouTube Data API returned status %s: %s", resp.status_code, resp.text[:150])
         except Exception as exc:
@@ -303,27 +307,29 @@ def generate_default_visual_svg(misconception_id: str, concept: str, label: str)
 
 class LLMClient:
     """
-    Unified client providing resilient LLM completion with automatic failover.
-    Groq (Primary) -> Gemini (Fallback) -> Mock (if configured or keys absent).
+    Unified client providing resilient LLM completion via OpenRouter Auto-Rotating Pool,
+    with transparent Mock fallback for testing and offline development.
     """
 
     def __init__(
         self,
-        primary_provider: Optional[LLMProvider] = None,
-        fallback_provider: Optional[LLMProvider] = None,
         mock_provider: Optional[LLMProvider] = None,
         force_mode: Optional[str] = None,
     ):
         self.mode = force_mode or settings.LLM_MODE
 
         self.mock_provider = mock_provider or MockProvider()
-        self.primary_provider = primary_provider or GroqProvider(
-            api_key=settings.GROQ_API_KEY,
-            model=settings.GROQ_MODEL,
+        
+        # Use OpenRouter for all calls, but allow routing based on task
+        api_keys = settings.OPEN_ROUTER_API or settings.OPENROUTER_API_KEY
+        
+        self.diagnostic_provider = OpenRouterPoolProvider(
+            api_keys_str=api_keys,
+            model=settings.OPENROUTER_DIAGNOSTIC_MODEL,
         )
-        self.fallback_provider = fallback_provider or GeminiProvider(
-            api_key=settings.GEMINI_API_KEY,
-            model=settings.GEMINI_MODEL,
+        self.remediation_provider = OpenRouterPoolProvider(
+            api_keys_str=api_keys,
+            model=settings.OPENROUTER_REMEDIATION_MODEL,
         )
 
     async def complete(
@@ -335,9 +341,7 @@ class LLMClient:
         preferred_provider: Optional[str] = None,
     ) -> LLMResponse:
         """
-        Executes completion with fallback strategy and provider preference.
-        Routes to Groq for questions/distractors or Gemini for remediation.
-        If mode is 'mock', directly executes via MockProvider.
+        Executes completion using OpenRouter multi-key pool.
         """
         if self.mode == "mock":
             return await self.mock_provider.complete(
@@ -347,46 +351,18 @@ class LLMClient:
                 temperature=temperature,
             )
 
-        # Wire provider routing preference
-        if preferred_provider == "gemini":
-            first_provider = self.fallback_provider
-            second_provider = self.primary_provider
-        else:
-            first_provider = self.primary_provider
-            second_provider = self.fallback_provider
+        provider = self.remediation_provider if preferred_provider == "gemini" else self.diagnostic_provider
 
-        # 1. Try Preferred Provider
         try:
-            return await first_provider.complete(
+            return await provider.complete(
                 prompt=prompt,
                 system_prompt=system_prompt,
                 json_mode=json_mode,
                 temperature=temperature,
             )
-        except LLMProviderError as first_err:
-            logger.warning(
-                "Preferred LLM provider '%s' failed: %s. Initiating failover to '%s'...",
-                first_provider.name,
-                first_err.message,
-                second_provider.name,
-            )
-
-        # 2. Try Alternate Provider
-        try:
-            return await second_provider.complete(
-                prompt=prompt,
-                system_prompt=system_prompt,
-                json_mode=json_mode,
-                temperature=temperature,
-            )
-        except LLMProviderError as second_err:
-            logger.error(
-                "Alternate LLM provider '%s' also failed: %s.",
-                second_provider.name,
-                second_err.message,
-            )
-            # If in development or demo resilience is needed, fallback to mock if neither provider responded
-            if settings.ENVIRONMENT == "development" or not settings.GROQ_API_KEY:
+        except LLMProviderError as err:
+            logger.error("OpenRouter provider '%s' failed: %s", provider.model_name, err.message)
+            if settings.ENVIRONMENT == "development" or not (settings.OPEN_ROUTER_API or settings.OPENROUTER_API_KEY):
                 logger.info("Engaging MockProvider as ultimate development fallback.")
                 return await self.mock_provider.complete(
                     prompt=prompt,
@@ -394,11 +370,7 @@ class LLMClient:
                     json_mode=json_mode,
                     temperature=temperature,
                 )
-            raise LLMProviderError(
-                "llm_client",
-                f"All LLM providers failed. Attempted: {first_provider.name}, {second_provider.name}",
-                status_code=502,
-            )
+            raise err
 
     async def propose_hypotheses(
         self,
@@ -532,11 +504,20 @@ class LLMClient:
             fallback_check = f"Can you explain why {misconception_label} does not always hold true?"
 
         try:
-            data = json.loads(response.content)
-            if not data.get("feynman_explanation"):
-                data["feynman_explanation"] = fallback_feynman
-            if not data.get("visual_artifact_svg"):
-                data["visual_artifact_svg"] = generate_default_visual_svg(misconception_id, concept, misconception_label)
+            # Clean potential markdown backticks before parsing
+            raw_content = response.content.strip()
+            if raw_content.startswith("```json"):
+                raw_content = raw_content[7:]
+            if raw_content.startswith("```"):
+                raw_content = raw_content[3:]
+            if raw_content.endswith("```"):
+                raw_content = raw_content[:-3]
+            raw_content = raw_content.strip()
+
+            data = json.loads(raw_content)
+            
+            # Remove hardcoded SVG fallback
+            # We ONLY want the LLM's dynamically generated SVG
             
             # Use dynamic video if response has invalid or missing video
             resp_video = data.get("video_snippet")
@@ -549,7 +530,7 @@ class LLMClient:
 
             return RemediationResponse(**data)
         except Exception as exc:
-            logger.error("Failed to parse remediation JSON: %s. Falling back to structured response.", exc)
+            logger.error("Failed to parse remediation JSON: %s. Response content: %s", exc, response.content)
             return RemediationResponse(
                 misconception_id=misconception_id,
                 remediation_title=f"Understanding {concept}",
@@ -557,7 +538,7 @@ class LLMClient:
                 key_takeaway=fallback_takeaway,
                 check_for_understanding=fallback_check,
                 feynman_explanation=fallback_feynman,
-                visual_artifact_svg=generate_default_visual_svg(misconception_id, concept, misconception_label),
+                visual_artifact_svg=None,  # No hardcoded visualization!
                 video_snippet=dynamic_video,
             )
 
@@ -567,10 +548,11 @@ class LLMClient:
         concept: Optional[str] = None,
         difficulty: str = "medium",
         target_misconceptions: Optional[str] = None,
+        is_followup: bool = False,
     ) -> Optional[Question]:
         """
         Generates a diagnostic multiple-choice question where distractors map to misconceptions.
-        Routes to Groq as the preferred provider.
+        Routes to OpenRouter as the preferred provider.
         """
         import uuid
         concept_str = concept or topic
@@ -604,6 +586,10 @@ class LLMClient:
                     f"- causal_inversion: Inverting cause and effect in {concept_str}."
                 )
 
+        # Include random seed to guarantee a completely new question text every time
+        random_seed = uuid.uuid4().hex[:8]
+        seed_instruction = f" Ensure this is a COMPLETELY NEW and UNIQUE question text that hasn't been asked yet. Random seed: {random_seed}."
+
         prompt = USER_PROMPT_QUESTION_GENERATION.format(
             topic=topic,
             concept=concept_str,
@@ -611,14 +597,14 @@ class LLMClient:
             target_misconceptions=targets_desc,
             question_id_prefix=f"{prefix}_q",
             prerequisite=f"Introductory {topic}",
-        )
+        ) + seed_instruction
 
         try:
             response = await self.complete(
                 prompt=prompt,
                 system_prompt=SYSTEM_PROMPT_QUESTION_GENERATION,
                 json_mode=True,
-                preferred_provider="groq",
+                preferred_provider="diagnostic",
             )
             raw = json.loads(response.content)
             if isinstance(raw, list) and raw:
@@ -629,27 +615,45 @@ class LLMClient:
                 raw = raw["questions"][0]
 
             q_id = f"{prefix}_gen_{uuid.uuid4().hex[:8]}"
+
+            # Strictly sanitize options to only A, B, C, D keys
+            raw_options = raw.get("options") or {}
+            cleaned_options = {}
+            for k, v in raw_options.items():
+                k_clean = str(k).strip().upper()
+                if k_clean in ["A", "B", "C", "D"] and isinstance(v, str):
+                    cleaned_options[k_clean] = v.strip()
+
+            if len(cleaned_options) < 4:
+                for opt_key in ["A", "B", "C", "D"]:
+                    if opt_key not in cleaned_options:
+                        cleaned_options[opt_key] = f"Option {opt_key}"
+
+            correct_opt = str(raw.get("correct_option") or "B").strip().upper()
+            if correct_opt not in ["A", "B", "C", "D"]:
+                correct_opt = "B"
+
+            raw_distractors = raw.get("distractor_misconceptions") or {}
+            cleaned_distractors = {}
+            for k, v in raw_distractors.items():
+                k_clean = str(k).strip().upper()
+                if k_clean in ["A", "B", "C", "D"] and k_clean != correct_opt:
+                    cleaned_distractors[k_clean] = str(v)
+
             return Question(
                 id=q_id,
                 concept=raw.get("concept") or concept_str,
                 topic=raw.get("topic") or topic,
                 prerequisite=raw.get("prerequisite") or f"Introductory {topic}",
                 difficulty=raw.get("difficulty") or difficulty,
-                question_type="diagnostic",
+                question_type="followup" if is_followup else "diagnostic",
                 question_text=raw.get("question_text") or f"Diagnostic assessment on {concept_str}",
-                options=raw.get("options") or {
-                    "A": "Option A",
-                    "B": "Option B",
-                    "C": "Option C",
-                    "D": "Option D",
+                options=cleaned_options,
+                correct_option=correct_opt,
+                distractor_misconceptions=cleaned_distractors or {
+                    k: f"misconception_{k.lower()}" for k in ["A", "B", "C", "D"] if k != correct_opt
                 },
-                correct_option=raw.get("correct_option") or "B",
-                distractor_misconceptions=raw.get("distractor_misconceptions") or {
-                    "A": "conceptual_misconception_1",
-                    "C": "conceptual_misconception_2",
-                    "D": "conceptual_misconception_3",
-                },
-                diagnostic_targets=raw.get("diagnostic_targets") or list(raw.get("distractor_misconceptions", {}).values()),
+                diagnostic_targets=raw.get("diagnostic_targets") or list(cleaned_distractors.values()),
                 explanation=raw.get("explanation") or f"Correct understanding of {concept_str}",
             )
         except Exception as exc:
@@ -732,8 +736,8 @@ class LLMClient:
 
         # 1. Try Gemini (multimodal vision)
         try:
-            if settings.GEMINI_API_KEY and hasattr(self.fallback_provider, "describe_image"):
-                return await self.fallback_provider.describe_image(image_bytes, mime_type, prompt_text)
+            if (settings.OPEN_ROUTER_API or settings.OPENROUTER_API_KEY) and hasattr(self.remediation_provider, "describe_image"):
+                return await self.remediation_provider.describe_image(image_bytes, mime_type, prompt_text)
         except Exception as exc:
             logger.warning("Gemini vision description failed: %s", exc)
 

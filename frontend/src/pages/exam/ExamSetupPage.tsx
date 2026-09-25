@@ -144,23 +144,6 @@ export const ExamSetupPage: React.FC = () => {
             autoFocus
           />
 
-          <div className="flex items-center flex-wrap gap-2 pt-1">
-            <span className="text-xs text-muted-foreground font-semibold">Suggestions:</span>
-            {SUGGESTED_TOPICS.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setTopic(t)}
-                className={`text-xs px-2.5 py-1 rounded-lg border transition font-medium ${
-                  topic.toLowerCase() === t.toLowerCase()
-                    ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
-                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
         </CardContent>
       </Card>
 
