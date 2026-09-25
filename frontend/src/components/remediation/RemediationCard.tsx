@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Lightbulb, BookOpen, Key, ArrowRight, HelpCircle, Sparkles, FileText, CheckCircle2 } from "lucide-react";
+import { Lightbulb, BookOpen, Key, ArrowRight, HelpCircle, Sparkles, FileText, CheckCircle2, Image as ImageIcon } from "lucide-react";
 import { RemediationResponse } from "@/types";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +16,11 @@ export const RemediationCard: React.FC<RemediationCardProps> = ({
 }) => {
   const isGrounded = !!remediation.grounded;
   const primarySource = remediation.sources && remediation.sources.length > 0 ? remediation.sources[0] : null;
+  const isImageSource = primarySource?.source_type === "image" || (remediation.grounded_source?.includes("Figure") ?? false);
+  const defaultSourceLabel = primarySource
+    ? `${primarySource.document_name} — ${primarySource.source_type === "image" ? `Figure, Page ${primarySource.page_number}` : `Page ${primarySource.page_number}`}`
+    : "Course Notes";
+
 
   return (
     <Card className="border border-border/80 shadow-card bg-card overflow-hidden">
@@ -52,13 +57,18 @@ export const RemediationCard: React.FC<RemediationCardProps> = ({
           <div className="p-4 sm:p-5 rounded-xl bg-emerald-50/70 border border-emerald-200/90 text-emerald-950 space-y-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-emerald-800">
-                <FileText className="w-4 h-4 text-emerald-600" />
-                <span>Textbook &amp; Course Citation</span>
+                {isImageSource ? (
+                  <ImageIcon className="w-4 h-4 text-emerald-600" />
+                ) : (
+                  <FileText className="w-4 h-4 text-emerald-600" />
+                )}
+                <span>{isImageSource ? "Diagram & Figure Citation" : "Textbook & Course Citation"}</span>
               </div>
               <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200">
-                {remediation.grounded_source || (primarySource ? `${primarySource.document_name} — Page ${primarySource.page_number}` : "Course Notes")}
+                {remediation.grounded_source || defaultSourceLabel}
               </span>
             </div>
+
 
             {primarySource?.excerpt && (
               <blockquote className="pl-3 border-l-2 border-emerald-400 text-xs sm:text-sm text-emerald-900 italic bg-white/60 p-2.5 rounded-r-md">

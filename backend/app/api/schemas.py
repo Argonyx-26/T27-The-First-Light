@@ -4,7 +4,15 @@ API request and response schemas matching shared/schemas.md contracts.
 
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
-from app.engine.models import Hypothesis, Question
+from app.engine.models import (
+    DailyRevisionQuestionItem,
+    DailyRevisionResponse,
+    Hypothesis,
+    Question,
+    RevisionItem,
+    RevisionListResponse,
+)
+
 
 
 # ==============================================================================
@@ -97,6 +105,8 @@ class SourceItem(BaseModel):
     page_number: int
     excerpt: str
     similarity_score: float = 0.0
+    source_type: str = "text"
+
 
 
 class RemediateRequest(BaseModel):
@@ -215,19 +225,11 @@ class KnowledgeMapResponse(BaseModel):
 
 
 # ==============================================================================
-# 8. Revision List Schemas
+# 8. Revision List Schemas (imported from app.engine.models)
 # ==============================================================================
-class RevisionItem(BaseModel):
-    concept: str
-    misconception: str
-    status: str
-    recommended_review_in_days: int
-    summary: str
+# RevisionItem, RevisionListResponse, DailyRevisionQuestionItem, DailyRevisionResponse
 
 
-class RevisionListResponse(BaseModel):
-    session_id: str
-    revision_items: List[RevisionItem]
 
 
 # ==============================================================================
@@ -575,4 +577,38 @@ class TeacherExamsResponse(BaseModel):
     exams: List[TeacherExamSummary]
     total_exams: int
     average_score: float
+
+
+# ==============================================================================
+# 11. Longitudinal Loss Attribution & Progress Journey Schemas
+# ==============================================================================
+class LossAttributionResponse(BaseModel):
+    student_id: str
+    total_evaluated_attempts: int
+    total_losses: int
+    why_you_lost_marks: Dict[str, int]
+    percentages: Dict[str, float]
+    conceptual: int = 0
+    overconfidence_errors: int = 0
+    calculation_slips: int = 0
+    formula_confusion: int = 0
+
+
+class JourneyStageItem(BaseModel):
+    stage_id: str
+    title: str
+    status: str  # "completed", "current", "upcoming"
+    timestamp: Optional[str] = None
+    detail: str
+    metadata: Dict[str, Any] = {}
+
+
+class MisconceptionJourneyResponse(BaseModel):
+    session_id: str
+    misconception_id: str
+    misconception_label: str
+    current_stage: str
+    current_stage_index: int
+    stages: List[JourneyStageItem]
+
 

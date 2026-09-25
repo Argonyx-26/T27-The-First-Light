@@ -260,6 +260,56 @@ class LLMClient:
                 confidence=0.8,
             )
 
+    async def describe_image(
+        self,
+        image_bytes: bytes,
+        mime_type: str = "image/png",
+        prompt: Optional[str] = None,
+    ) -> str:
+        """
+        Generates an educational caption/description for an image or diagram using multimodal LLM or fallback.
+        """
+        prompt_text = prompt or (
+            "Describe this diagram or figure clearly and concisely for an educational study guide, "
+            "focusing on key scientific principles, labels, and concepts illustrated."
+        )
+
+        if self.mode == "mock":
+            return await self.mock_provider.describe_image(image_bytes, mime_type, prompt_text)
+
+        # 1. Try Gemini (multimodal vision)
+        try:
+            if settings.GEMINI_API_KEY and hasattr(self.fallback_provider, "describe_image"):
+                return await self.fallback_provider.describe_image(image_bytes, mime_type, prompt_text)
+        except Exception as exc:
+            logger.warning("Gemini vision description failed: %s", exc)
+
+        # 2. Fallback to mock
+        return await self.mock_provider.describe_image(image_bytes, mime_type, prompt_text)
+
+    def describe_image_sync(
+        self,
+        image_bytes: bytes,
+        mime_type: str = "image/png",
+        prompt: Optional[str] = None,
+    ) -> str:
+        """Synchronous runner for describe_image."""
+        import asyncio
+        import concurrent.futures
+
+        coro = self.describe_image(image_bytes=image_bytes, mime_type=mime_type, prompt=prompt)
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                return pool.submit(asyncio.run, coro).result()
+        else:
+            return asyncio.run(coro)
+
 
 # Default client instance
 default_llm_client = LLMClient()
+

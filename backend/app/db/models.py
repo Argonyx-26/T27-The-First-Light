@@ -74,9 +74,11 @@ class MisconceptionStateModel(Base):
     probability = Column(Float, nullable=False)
     status = Column(String(32), default="candidate")  # candidate, confirmed, resolved, persistent
     evidence_count = Column(Integer, default=0)
+    revision_priority = Column(Float, default=0.0)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     session = relationship("SessionModel", back_populates="misconception_states")
+
 
 
 class EvidenceRecordModel(Base):

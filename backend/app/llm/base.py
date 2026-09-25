@@ -44,3 +44,15 @@ class LLMProvider(ABC):
         Raises LLMProviderError on failure so fallback logic can activate.
         """
         pass
+
+    async def describe_image(
+        self,
+        image_bytes: bytes,
+        mime_type: str = "image/png",
+        prompt: Optional[str] = None,
+    ) -> str:
+        """
+        Generates an educational caption/description for an image or diagram.
+        """
+        return "Educational diagram illustrating conceptual principles."
+

@@ -15,6 +15,7 @@ from app.api.schemas import (
     ConfidenceCalibration,
     CreateSessionRequest,
     CreateSessionResponse,
+    DailyRevisionResponse,
     DashboardResponse,
     DiagnosisSummary,
     DocumentListResponse,
@@ -32,6 +33,7 @@ from app.api.schemas import (
     RemediateResponse,
     RevisionItem,
     RevisionListResponse,
+
     SameScoreDemoResponse,
     SourceItem,
     StudentDetailProfileResponse,
@@ -55,6 +57,8 @@ from app.api.schemas import (
     SubmitExamResponse,
     TeacherExamSummary,
     TeacherExamsResponse,
+    LossAttributionResponse,
+    MisconceptionJourneyResponse,
 )
 from app.db.cohort_seed import DEMO_STUDENTS, seed_cohort_if_needed
 from app.db.database import get_db
@@ -74,7 +78,8 @@ from app.db.repositories import (
     question_repository as question_repo,
     session_repository as session_repo,
 )
-from app.engine.exam_diagnostic import analyze_exam_submission
+from app.engine.exam_diagnostic import analyze_exam_submission, compute_longitudinal_loss_attribution
+from app.engine.journey_engine import compute_misconception_journey
 from app.engine.hypothesis_engine import (
     check_confirmation_gate,
     get_top_hypotheses,
@@ -83,9 +88,11 @@ from app.engine.hypothesis_engine import (
     update_hypotheses,
 )
 from app.engine.question_selector import select_best_diagnostic_question
+from app.engine.revision_engine import compose_daily_revision_set, get_prioritized_revision_list
 from app.engine.verification import evaluate_verification
 from app.llm.client import LLMClient, default_llm_client
 from app.llm.self_consistency_service import SelfConsistencyService
+
 
 import sys
 root_dir = Path(__file__).resolve().parent.parent.parent.parent
@@ -96,7 +103,9 @@ if "rag" in sys.modules and not hasattr(sys.modules["rag"], "__file__"):
 
 from rag.retrieval.retriever import default_rag_retriever
 from rag.ingestion.pipeline import default_ingestion_pipeline
+from rag.ingestion.pdf_loader import DocumentLoader
 from rag.storage.chroma import default_chroma_store
+
 
 logger = logging.getLogger(__name__)
 
@@ -434,12 +443,16 @@ async def remediate(
                         page_number=c.page_number,
                         excerpt=c.content[:200] + ("..." if len(c.content) > 200 else ""),
                         similarity_score=c.similarity_score,
+                        source_type=getattr(c, "source_type", "text"),
                     )
                     for c in retrieval_res.chunks
                 ]
                 top_chunk = retrieval_res.chunks[0]
-                grounded_source = f"{top_chunk.document_name} — Page {top_chunk.page_number}"
+                source_type = getattr(top_chunk, "source_type", "text")
+                page_label = f"Figure, Page {top_chunk.page_number}" if source_type == "image" else f"Page {top_chunk.page_number}"
+                grounded_source = f"{top_chunk.document_name} — {page_label}"
                 page_number = top_chunk.page_number
+
         except Exception as rag_err:
             logger.warning("RAG retrieval failed, falling back to ungrounded remediation: %s", rag_err)
 
@@ -648,7 +661,7 @@ def get_knowledge_map(
 
 
 # ==============================================================================
-# 8. GET /revision-list/{session_id}
+# 8. GET /revision-list/{session_id} & GET /revision/daily/{session_id}
 # ==============================================================================
 @router.get("/revision-list/{session_id}", response_model=RevisionListResponse)
 def get_revision_list(
@@ -659,30 +672,20 @@ def get_revision_list(
     if not session:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Session '{session_id}' not found.")
 
-    hyps_records = (
-        db.query(MisconceptionStateModel)
-        .filter(MisconceptionStateModel.session_id == session_id)
-        .order_by(MisconceptionStateModel.probability.desc())
-        .all()
-    )
+    return get_prioritized_revision_list(db=db, session_id=session_id)
 
-    items: List[RevisionItem] = []
-    for r in hyps_records:
-        if r.status in ("persistent", "developing", "confirmed"):
-            items.append(
-                RevisionItem(
-                    concept=session.topic,
-                    misconception=r.label,
-                    status=r.status,
-                    recommended_review_in_days=1 if r.status == "persistent" else 3,
-                    summary=f"Review targeted fundamentals for '{r.label}'.",
-                )
-            )
 
-    return RevisionListResponse(
-        session_id=session_id,
-        revision_items=items,
-    )
+@router.get("/revision/daily/{session_id}", response_model=DailyRevisionResponse)
+def get_daily_revision(
+    session_id: str,
+    db: Session = Depends(get_db),
+):
+    session = session_repo.get_session(db, session_id)
+    if not session:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Session '{session_id}' not found.")
+
+    return compose_daily_revision_set(db=db, session_id=session_id)
+
 
 
 # ==============================================================================
@@ -1193,15 +1196,16 @@ async def upload_rag_document(
     topic: Optional[str] = Form(None),
     db: Session = Depends(get_db),
 ):
-    """Uploads and ingests a study material document (.pdf, .txt, .md) into the RAG knowledge store."""
-    allowed_exts = {".pdf", ".txt", ".md"}
+    """Uploads and ingests a study material document (.pdf, .txt, .md, .png, .jpg, .jpeg, .webp) into the RAG knowledge store."""
+    allowed_exts = DocumentLoader.SUPPORTED_EXTENSIONS
     filename = file.filename or "uploaded_doc"
     ext = Path(filename).suffix.lower()
     if ext not in allowed_exts:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported file type '{ext}'. Allowed types: {', '.join(allowed_exts)}",
+            detail=f"Unsupported file type '{ext}'. Allowed types: {', '.join(sorted(allowed_exts))}",
         )
+
 
     try:
         doc = default_ingestion_pipeline.ingest_file(
@@ -1709,6 +1713,39 @@ def get_teacher_exams(
         total_exams=len(exam_summaries),
         average_score=avg_score,
     )
+
+
+# ==============================================================================
+# 11. Longitudinal Loss Attribution & Progress Journey Endpoints
+# ==============================================================================
+@router.get("/analytics/loss-attribution/{student_id}", response_model=LossAttributionResponse)
+def get_loss_attribution(
+    student_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Returns deterministic longitudinal 4-category loss attribution across all
+    exam and practice attempts for the student.
+    """
+    seed_cohort_if_needed(db)
+    res = compute_longitudinal_loss_attribution(db, student_id)
+    return LossAttributionResponse(**res)
+
+
+@router.get("/journey/{session_id}/{misconception_id}", response_model=MisconceptionJourneyResponse)
+def get_misconception_journey(
+    session_id: str,
+    misconception_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Returns the dynamic 5-node Progress Journey timeline:
+    Diagnosed -> Learned -> Practiced -> Verified -> Mastered
+    computed directly from existing session, state, remediation, and attempt records.
+    """
+    res = compute_misconception_journey(db, session_id, misconception_id)
+    return MisconceptionJourneyResponse(**res)
+
 
 
 

@@ -30,10 +30,15 @@ class PageAwareChunker:
         topic: Optional[str] = None,
     ) -> List[DocumentChunk]:
         all_chunks: List[DocumentChunk] = []
+        page_source_counts: Dict[tuple, int] = {}
 
         for page in pages:
             page_num = page["page_number"]
             page_text = page["text"]
+            source_type = page.get("source_type", "text")
+
+            key = (page_num, source_type)
+            start_index = page_source_counts.get(key, 0) + 1
 
             page_chunks = self._chunk_text(
                 text=page_text,
@@ -41,7 +46,10 @@ class PageAwareChunker:
                 document_id=document_id,
                 document_name=document_name,
                 topic=topic,
+                source_type=source_type,
+                start_index=start_index,
             )
+            page_source_counts[key] = start_index + len(page_chunks) - 1
             all_chunks.extend(page_chunks)
 
         return all_chunks
@@ -53,15 +61,19 @@ class PageAwareChunker:
         document_id: str,
         document_name: str,
         topic: Optional[str] = None,
+        source_type: str = "text",
+        start_index: int = 1,
     ) -> List[DocumentChunk]:
         chunks: List[DocumentChunk] = []
         text = text.strip()
         if not text:
             return []
 
+        prefix = "img" if source_type == "image" else "c"
+
         # If text is small enough, keep as single chunk
         if len(text) <= self.chunk_size:
-            chunk_id = f"{document_id}_p{page_number}_c1"
+            chunk_id = f"{document_id}_p{page_number}_{prefix}{start_index}"
             return [
                 DocumentChunk(
                     chunk_id=chunk_id,
@@ -70,12 +82,13 @@ class PageAwareChunker:
                     page_number=page_number,
                     text=text,
                     topic=topic,
+                    metadata={"source_type": source_type},
                 )
             ]
 
         # Break text using sliding window with word boundaries
         start = 0
-        chunk_idx = 1
+        chunk_idx = start_index
         text_len = len(text)
 
         while start < text_len:
@@ -92,7 +105,7 @@ class PageAwareChunker:
             chunk_content = text[start:end].strip()
 
             if len(chunk_content) >= self.min_chunk_size:
-                chunk_id = f"{document_id}_p{page_number}_c{chunk_idx}"
+                chunk_id = f"{document_id}_p{page_number}_{prefix}{chunk_idx}"
                 chunks.append(
                     DocumentChunk(
                         chunk_id=chunk_id,
@@ -101,6 +114,7 @@ class PageAwareChunker:
                         page_number=page_number,
                         text=chunk_content,
                         topic=topic,
+                        metadata={"source_type": source_type},
                     )
                 )
                 chunk_idx += 1

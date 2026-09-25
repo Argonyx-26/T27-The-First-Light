@@ -4,8 +4,11 @@
  */
 
 import {
+  CreateExamRequest,
+  DailyRevisionResponse,
   DashboardResponse,
   DocumentListResponse,
+
   KnowledgeMapResponse,
   Question,
   RAGUploadResponse,
@@ -19,12 +22,14 @@ import {
   TeacherOverviewResponse,
   TeacherStudentsResponse,
   VerifyResponse,
-  CreateExamRequest,
   ExamReportResponse,
   ExamSessionResponse,
+
   SaveExamAnswerRequest,
   SubmitExamResponse,
   TeacherExamsResponse,
+  LossAttributionResponse,
+  MisconceptionJourneyResponse,
 } from "@/types";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -220,6 +225,14 @@ export const api = {
   },
 
   /**
+   * Retrieves deterministic 5-question daily revision set.
+   */
+  async getDailyRevision(sessionId: string): Promise<DailyRevisionResponse> {
+    return request<DailyRevisionResponse>(`/revision/daily/${encodeURIComponent(sessionId)}`);
+  },
+
+
+  /**
    * Retrieves high-level teacher cohort overview metrics and alerts.
    */
   async getTeacherOverview(): Promise<TeacherOverviewResponse> {
@@ -312,6 +325,22 @@ export const api = {
    */
   async getTeacherExams(): Promise<TeacherExamsResponse> {
     return request<TeacherExamsResponse>("/teacher/exams");
+  },
+
+  /**
+   * Retrieves longitudinal loss attribution answering 'Why you are losing marks' across all student history.
+   */
+  async getLossAttribution(studentId: string): Promise<LossAttributionResponse> {
+    return request<LossAttributionResponse>(`/analytics/loss-attribution/${encodeURIComponent(studentId)}`);
+  },
+
+  /**
+   * Retrieves per-misconception 5-stage progress journey timeline.
+   */
+  async getMisconceptionJourney(sessionId: string, misconceptionId: string): Promise<MisconceptionJourneyResponse> {
+    return request<MisconceptionJourneyResponse>(
+      `/journey/${encodeURIComponent(sessionId)}/${encodeURIComponent(misconceptionId)}`
+    );
   },
 
   /**

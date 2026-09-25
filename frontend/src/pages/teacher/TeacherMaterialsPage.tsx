@@ -224,17 +224,18 @@ export const TeacherMaterialsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Select Document (.pdf, .txt, .md)
+                Select Document or Diagram (.pdf, .txt, .md, .png, .jpg)
               </label>
               <div className="flex items-center gap-3">
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".pdf,.txt,.md"
+                  accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.webp"
                   onChange={handleFileChange}
                   className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
                 />
               </div>
+
               {selectedFile && (
                 <p className="text-[11px] text-muted-foreground mt-1.5">
                   Selected: <strong>{selectedFile.name}</strong> ({(selectedFile.size / 1024).toFixed(1)} KB)

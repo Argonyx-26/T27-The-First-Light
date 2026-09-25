@@ -111,6 +111,33 @@ export const RevisionPage: React.FC = () => {
       {/* Content */}
       {!loading && !error && (
         <>
+          {/* Daily 10-Minute Revision Hero Banner */}
+          <Card className="border-indigo-200/80 bg-gradient-to-r from-indigo-900 to-slate-900 text-white shadow-md overflow-hidden">
+            <CardContent className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Cognitive Spaced Retrieval</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                  Daily 10-Minute Cognitive Revision
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                  5 curated questions: 2 top persistent misconception targets, 2 spaced retention checks on recently resolved gaps, and 1 confidence-calibration probe.
+                </p>
+              </div>
+
+              <Button
+                size="lg"
+                onClick={() => navigate("/revision/daily")}
+                className="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold shadow-md whitespace-nowrap gap-2 self-start md:self-auto"
+              >
+                <span>Start Daily Revision</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Quick Metrics Bar */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Card className="bg-card/50">
@@ -153,6 +180,7 @@ export const RevisionPage: React.FC = () => {
               </CardContent>
             </Card>
           </div>
+
 
           {/* List or Empty State */}
           {items.length === 0 ? (
@@ -211,12 +239,23 @@ export const RevisionPage: React.FC = () => {
                             >
                               {item.status}
                             </Badge>
+                            {typeof item.revision_priority === "number" && item.revision_priority > 0 && (
+                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200/60">
+                                Priority Score: {item.revision_priority.toFixed(1)}
+                              </span>
+                            )}
+                            {typeof item.questions_affected === "number" && item.questions_affected > 0 && (
+                              <span className="text-[11px] font-medium text-muted-foreground">
+                                • {item.questions_affected} {item.questions_affected === 1 ? "question" : "questions"} affected
+                              </span>
+                            )}
                             <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <Calendar className="w-3.5 h-3.5" />
                               Review in {item.recommended_review_in_days}{" "}
                               {item.recommended_review_in_days === 1 ? "day" : "days"}
                             </span>
                           </div>
+
 
                           <h3 className="text-base font-bold text-foreground">
                             {item.misconception}

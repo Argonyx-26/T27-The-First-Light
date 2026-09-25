@@ -62,6 +62,7 @@ class RAGRetriever:
             if item.similarity_score >= self.min_relevance_threshold or item.distance <= 1.2:
                 valid_chunks.append(item)
                 excerpt = item.chunk.text[:240].strip() + ("..." if len(item.chunk.text) > 240 else "")
+                source_type = item.chunk.metadata.get("source_type", "text")
                 sources.append(
                     SourceItem(
                         document_id=item.chunk.document_id,
@@ -70,6 +71,7 @@ class RAGRetriever:
                         chunk_id=item.chunk.chunk_id,
                         relevance_score=item.similarity_score,
                         excerpt=excerpt,
+                        source_type=source_type,
                     )
                 )
 
@@ -98,8 +100,10 @@ class RAGRetriever:
             c = item.chunk
             # Sanitize text boundaries
             clean_text = c.text.replace("```", "'''")
+            source_type = c.metadata.get("source_type", "text")
+            page_label = f"Figure, Page {c.page_number}" if source_type == "image" else f"Page {c.page_number}"
             lines.append(f"--- EXCERPT {idx} ---")
-            lines.append(f"Document: {c.document_name} (Page {c.page_number})")
+            lines.append(f"Document: {c.document_name} ({page_label})")
             lines.append(f"Content:\n{clean_text}")
             lines.append(f"--- END EXCERPT {idx} ---\n")
 
@@ -134,10 +138,12 @@ class RAGRetriever:
                 self.page_number = item.chunk.page_number
                 self.content = item.chunk.text
                 self.similarity_score = item.similarity_score
+                self.source_type = item.chunk.metadata.get("source_type", "text")
 
         formatted_chunks = [ChunkItem(item) for item in raw_chunks]
         context_str = self.format_context_for_prompt(raw_chunks)
         return RetrievalResult(sources, formatted_chunks, context_str)
+
 
 
 default_rag_retriever = RAGRetriever()

@@ -70,7 +70,9 @@ export interface SourceItem {
   page_number: number;
   excerpt: string;
   similarity_score?: number;
+  source_type?: 'text' | 'image' | string;
 }
+
 
 export interface RemediationResponse {
   misconception_id: string;
@@ -168,15 +170,35 @@ export interface KnowledgeMapResponse {
 export interface RevisionItem {
   concept: string;
   misconception: string;
+  misconception_id?: string;
   status: string;
   recommended_review_in_days: number;
   summary: string;
+  revision_priority?: number;
+  questions_affected?: number;
 }
 
 export interface RevisionListResponse {
   session_id: string;
   revision_items: RevisionItem[];
 }
+
+export interface DailyRevisionQuestionItem {
+  question: Question;
+  revision_type: "persistent_misconception" | "spaced_recheck" | "confidence_calibration" | string;
+  target_misconception_id?: string | null;
+  target_misconception_label?: string | null;
+  reason_description: string;
+}
+
+export interface DailyRevisionResponse {
+  session_id: string;
+  topic: string;
+  total_questions: number;
+  estimated_minutes: number;
+  questions: DailyRevisionQuestionItem[];
+}
+
 
 export interface StudentSummary {
   student_id: string;
@@ -525,5 +547,39 @@ export interface TeacherExamsResponse {
   total_exams: number;
   average_score: number;
 }
+
+// =============================================================================
+// Stage 8: Longitudinal Loss Attribution & Progress Journey Types
+// =============================================================================
+export interface LossAttributionResponse {
+  student_id: string;
+  total_evaluated_attempts: number;
+  total_losses: number;
+  why_you_lost_marks: Record<string, number>;
+  percentages: Record<string, number>;
+  conceptual: number;
+  overconfidence_errors: number;
+  calculation_slips: number;
+  formula_confusion: number;
+}
+
+export interface JourneyStageItem {
+  stage_id: string;
+  title: string;
+  status: "completed" | "current" | "upcoming";
+  timestamp?: string | null;
+  detail: string;
+  metadata?: Record<string, any>;
+}
+
+export interface MisconceptionJourneyResponse {
+  session_id: string;
+  misconception_id: string;
+  misconception_label: string;
+  current_stage: string;
+  current_stage_index: number;
+  stages: JourneyStageItem[];
+}
+
 
 

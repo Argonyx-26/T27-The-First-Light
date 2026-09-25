@@ -49,7 +49,7 @@ chroma_db/
 *.chroma
 rag/storage/
 **/rag/storage/
-backend/rag/storage/
+
 
 # Node & Frontend
 node_modules/

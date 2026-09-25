@@ -1,19 +1,41 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
-import { TrendingUp, AlertTriangle, PieChart, ShieldAlert, Award, Target } from "lucide-react";
+import { TrendingUp, AlertTriangle, PieChart, ShieldAlert, Award, Target, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/Alert";
 import { TeacherCalibrationMatrix } from "@/components/teacher/TeacherCalibrationMatrix";
+import { LossAttributionCard } from "@/components/analytics/LossAttributionCard";
 import { Progress } from "@/components/ui/Progress";
 
 export const TeacherAnalyticsPage: React.FC = () => {
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["teacherAnalytics"],
     queryFn: () => api.getTeacherAnalytics(),
   });
+
+  const { data: studentsData } = useQuery({
+    queryKey: ["teacherStudents"],
+    queryFn: () => api.getTeacherStudents(),
+  });
+
+  useEffect(() => {
+    if (!selectedStudentId && studentsData?.students && studentsData.students.length > 0) {
+      setSelectedStudentId(studentsData.students[0].student_id);
+    }
+  }, [studentsData, selectedStudentId]);
+
+  const { data: studentLoss, isLoading: studentLossLoading } = useQuery({
+    queryKey: ["studentLossAttribution", selectedStudentId],
+    queryFn: () => api.getLossAttribution(selectedStudentId!),
+    enabled: !!selectedStudentId,
+  });
+
+  const selectedStudent = studentsData?.students.find((s) => s.student_id === selectedStudentId);
 
   if (isLoading) {
     return (
@@ -178,6 +200,55 @@ export const TeacherAnalyticsPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+      </section>
+
+      {/* Per-Student Longitudinal Loss Attribution Drilldown */}
+      <section className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-border/70 pt-6">
+          <div>
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-indigo-600" />
+              <span>Student Loss Attribution Drilldown</span>
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Inspect an individual student's longitudinal mark loss attribution across all practice and exams.
+            </p>
+          </div>
+
+          {studentsData?.students && studentsData.students.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <label htmlFor="student-picker" className="text-xs font-semibold text-slate-700">
+                Select Student:
+              </label>
+              <select
+                id="student-picker"
+                value={selectedStudentId || ""}
+                onChange={(e) => setSelectedStudentId(e.target.value)}
+                className="text-xs font-medium border border-border rounded-lg px-3 py-1.5 bg-white text-slate-800 shadow-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              >
+                {studentsData.students.map((st) => (
+                  <option key={st.student_id} value={st.student_id}>
+                    {st.name} ({st.topic})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        {studentLossLoading ? (
+          <Skeleton className="h-44 w-full rounded-2xl" />
+        ) : studentLoss ? (
+          <LossAttributionCard
+            data={studentLoss}
+            title={`${selectedStudent?.name || "Student"}'s Mark Loss Attribution`}
+            description={`Longitudinal cognitive error attribution for ${selectedStudent?.name || "selected student"} across all attempts.`}
+          />
+        ) : (
+          <div className="p-6 text-center text-xs text-muted-foreground bg-slate-50 rounded-xl border border-border/60">
+            Select a student above to inspect their personal mark loss breakdown.
+          </div>
+        )}
       </section>
     </div>
   );

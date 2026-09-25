@@ -41,8 +41,20 @@ class MockProvider(LLMProvider):
             usage={"prompt_tokens": 100, "completion_tokens": 100, "total_tokens": 200},
         )
 
+    async def describe_image(
+        self,
+        image_bytes: bytes,
+        mime_type: str = "image/png",
+        prompt: Optional[str] = None,
+    ) -> str:
+        return "Diagram illustrating Newton's First Law and force vectors on an object moving with constant velocity on a frictionless surface."
+
     def _generate_fixture(self, prompt: str) -> str:
         p_lower = prompt.lower()
+
+        # 0. Diagram / Image Description
+        if "describe this diagram" in p_lower or "figure" in p_lower or "diagram" in p_lower:
+            return "Diagram illustrating Newton's First Law and force vectors on an object moving with constant velocity on a frictionless surface."
 
         # 1. Self-Consistency Simulation
         if "simulated student" in p_lower or "simulate a student" in p_lower:

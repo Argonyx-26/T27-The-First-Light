@@ -172,6 +172,44 @@ class ExamDiagnosticResult:
         }
 
 
+def classify_attempt_error(
+    selected_option: Optional[str],
+    confidence: Optional[int],
+    is_correct: Optional[bool],
+    distractor_misconceptions: Dict[str, str],
+) -> tuple[Optional[str], bool, Optional[str]]:
+    """
+    Deterministic error classifier honoring the rule: DO NOT OVERCLAIM CARELESS ERRORS.
+    Returns:
+        (error_cat, is_overconfident, matched_misconception)
+        error_cat: "conceptual" | "formula_confusion" | "calculation_slips" | None
+        is_overconfident: bool (True if conf >= 4 and incorrect)
+        matched_misconception: Optional[str]
+    """
+    if is_correct is True or not selected_option:
+        return None, False, None
+
+    conf = confidence if confidence is not None else 3
+    is_overconfident = (conf >= 4)
+    matched_misc = distractor_misconceptions.get(selected_option)
+
+    if matched_misc == "calculation_error":
+        error_cat = "calculation_slips"
+    elif matched_misc == "formula_confusion":
+        error_cat = "formula_confusion"
+    elif conf == 1 and not matched_misc:
+        # Student explicitly declared a blind guess (confidence 1) with no conceptual distractor
+        error_cat = "calculation_slips"
+    elif matched_misc:
+        # Genuine cognitive distractor match
+        error_cat = "conceptual"
+    else:
+        # Unknown/unmapped distractor
+        error_cat = "conceptual"
+
+    return error_cat, is_overconfident, matched_misc
+
+
 def analyze_exam_submission(
     exam: ExamSessionModel,
     questions_map: Dict[str, QuestionModel],
@@ -281,28 +319,18 @@ def analyze_exam_submission(
             # ==================================================================
             # Principled Error Classification (DO NOT OVERCLAIM CARELESS ERRORS)
             # ==================================================================
-            # 1. Overconfidence error: high confidence wrong answer
-            is_overconfident = (conf >= 4)
+            error_cat, is_overconfident, matched_misc = classify_attempt_error(
+                selected_option=attempt.selected_option,
+                confidence=conf,
+                is_correct=False,
+                distractor_misconceptions=q_distractors,
+            )
             if is_overconfident:
                 error_breakdown["overconfidence_errors"] += 1
+            if error_cat in error_breakdown:
+                error_breakdown[error_cat] += 1
 
-            # 2. Categorize the underlying mechanism
-            if matched_misc == "calculation_error":
-                # Explicitly arithmetic/slip distractor
-                error_cat = "calculation_slips"
-                error_breakdown["calculation_slips"] += 1
-            elif matched_misc == "formula_confusion":
-                error_cat = "formula_confusion"
-                error_breakdown["formula_confusion"] += 1
-            elif conf == 1 and not matched_misc:
-                # Student explicitly declared a blind guess (confidence 1) with no conceptual distractor
-                error_cat = "calculation_slips"
-                error_breakdown["calculation_slips"] += 1
-            elif matched_misc:
-                # Genuine cognitive distractor match
-                error_cat = "conceptual"
-                error_breakdown["conceptual"] += 1
-
+            if matched_misc and error_cat == "conceptual":
                 # Record evidence for misconception aggregation
                 if matched_misc not in misconception_evidence:
                     misconception_evidence[matched_misc] = []
@@ -312,10 +340,6 @@ def analyze_exam_submission(
                     "concept": q.concept,
                     "question_id": q.id,
                 })
-            else:
-                # Unknown/unmapped error
-                error_cat = "conceptual"
-                error_breakdown["conceptual"] += 1
 
             label = matched_misc.replace("_", " ").title() if matched_misc else "Incorrect Distractor"
             questions_detail.append(
@@ -439,3 +463,152 @@ def analyze_exam_submission(
         concept_breakdown=concept_breakdown,
         calibration_index=calib_index,
     )
+
+
+def compute_longitudinal_loss_attribution(db, student_id: str) -> Dict[str, Any]:
+    """
+    Aggregates error loss attribution across all sessions, practice attempts, and exam attempts for a student.
+    Reuses the exact same deterministic classification logic as exam post-mortem analysis.
+    """
+    from app.db.models import (
+        AttemptModel,
+        ExamAttemptModel,
+        ExamSessionModel,
+        QuestionModel,
+        SessionModel,
+    )
+
+    # Resolve student sessions (matching either student_id or session_id)
+    matching_sessions = (
+        db.query(SessionModel)
+        .filter((SessionModel.student_id == student_id) | (SessionModel.id == student_id))
+        .all()
+    )
+    session_ids = [s.id for s in matching_sessions]
+
+    # If student_id was passed as a session_id, expand to all sessions for that student
+    if matching_sessions:
+        actual_student_id = matching_sessions[0].student_id
+        if actual_student_id and actual_student_id != student_id:
+            extra_sessions = (
+                db.query(SessionModel)
+                .filter(SessionModel.student_id == actual_student_id)
+                .all()
+            )
+            for s in extra_sessions:
+                if s.id not in session_ids:
+                    session_ids.append(s.id)
+
+    error_breakdown = {
+        "conceptual": 0,
+        "overconfidence_errors": 0,
+        "calculation_slips": 0,
+        "formula_confusion": 0,
+    }
+
+    if not session_ids:
+        return {
+            "student_id": student_id,
+            "total_evaluated_attempts": 0,
+            "total_losses": 0,
+            "why_you_lost_marks": error_breakdown,
+            "percentages": {k: 0.0 for k in error_breakdown},
+            "conceptual": 0,
+            "overconfidence_errors": 0,
+            "calculation_slips": 0,
+            "formula_confusion": 0,
+        }
+
+    total_evaluated_attempts = 0
+    total_losses = 0
+
+    # 1. Practice Attempts
+    practice_attempts = (
+        db.query(AttemptModel)
+        .filter(AttemptModel.session_id.in_(session_ids))
+        .all()
+    )
+
+    # 2. Exam Attempts
+    exam_sessions = (
+        db.query(ExamSessionModel)
+        .filter(ExamSessionModel.session_id.in_(session_ids))
+        .all()
+    )
+    exam_ids = [e.id for e in exam_sessions]
+    exam_attempts = (
+        db.query(ExamAttemptModel)
+        .filter(ExamAttemptModel.exam_id.in_(exam_ids))
+        .all()
+    ) if exam_ids else []
+
+    # Cache questions
+    all_q_ids = set([a.question_id for a in practice_attempts] + [ea.question_id for ea in exam_attempts])
+    questions_map: Dict[str, QuestionModel] = {}
+    if all_q_ids:
+        q_records = db.query(QuestionModel).filter(QuestionModel.id.in_(all_q_ids)).all()
+        questions_map = {q.id: q for q in q_records}
+
+    # Evaluate practice attempts
+    for att in practice_attempts:
+        total_evaluated_attempts += 1
+        if att.is_correct:
+            continue
+        total_losses += 1
+        q = questions_map.get(att.question_id)
+        distractors = {}
+        if q and q.distractor_misconceptions_json:
+            distractors = json.loads(q.distractor_misconceptions_json) if isinstance(q.distractor_misconceptions_json, str) else q.distractor_misconceptions_json
+
+        error_cat, is_overconfident, _ = classify_attempt_error(
+            selected_option=att.selected_option,
+            confidence=att.confidence,
+            is_correct=att.is_correct,
+            distractor_misconceptions=distractors,
+        )
+        if error_cat in error_breakdown:
+            error_breakdown[error_cat] += 1
+        if is_overconfident:
+            error_breakdown["overconfidence_errors"] += 1
+
+    # Evaluate exam attempts
+    for att in exam_attempts:
+        total_evaluated_attempts += 1
+        if att.is_correct or not att.selected_option:
+            if not att.is_correct and not att.selected_option:
+                total_losses += 1
+            continue
+        total_losses += 1
+        q = questions_map.get(att.question_id)
+        distractors = {}
+        if q and q.distractor_misconceptions_json:
+            distractors = json.loads(q.distractor_misconceptions_json) if isinstance(q.distractor_misconceptions_json, str) else q.distractor_misconceptions_json
+
+        error_cat, is_overconfident, _ = classify_attempt_error(
+            selected_option=att.selected_option,
+            confidence=att.confidence,
+            is_correct=att.is_correct,
+            distractor_misconceptions=distractors,
+        )
+        if error_cat in error_breakdown:
+            error_breakdown[error_cat] += 1
+        if is_overconfident:
+            error_breakdown["overconfidence_errors"] += 1
+
+    percentages = {}
+    denom = total_losses if total_losses > 0 else 1
+    for k, v in error_breakdown.items():
+        percentages[k] = round((v / denom) * 100, 1)
+
+    return {
+        "student_id": student_id,
+        "total_evaluated_attempts": total_evaluated_attempts,
+        "total_losses": total_losses,
+        "why_you_lost_marks": error_breakdown,
+        "percentages": percentages,
+        "conceptual": error_breakdown["conceptual"],
+        "overconfidence_errors": error_breakdown["overconfidence_errors"],
+        "calculation_slips": error_breakdown["calculation_slips"],
+        "formula_confusion": error_breakdown["formula_confusion"],
+    }
+

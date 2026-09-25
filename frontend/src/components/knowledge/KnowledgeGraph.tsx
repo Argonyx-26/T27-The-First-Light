@@ -15,6 +15,8 @@ import { BookOpen, AlertCircle, CheckCircle, HelpCircle } from "lucide-react";
 interface KnowledgeGraphProps {
   nodesData: KnowledgeMapNode[];
   topic: string;
+  onSelectMisconception?: (nodeId: string, nodeLabel: string) => void;
+  selectedMisconceptionId?: string | null;
 }
 
 // Custom Node for Concept
@@ -32,16 +34,22 @@ const ConceptNode = ({ data }: { data: { label: string; status: string } }) => {
 };
 
 // Custom Node for Misconceptions
-const MisconceptionNode = ({ data }: { data: { label: string; status: string } }) => {
+const MisconceptionNode = ({ data }: { data: { label: string; status: string; isSelected?: boolean } }) => {
   const isResolved = data.status === "resolved";
   const isPersistent = data.status === "persistent";
 
   return (
-    <div className="px-4 py-3 shadow-subtle rounded-xl bg-white border border-border min-w-[220px] max-w-[260px]">
+    <div
+      className={`px-4 py-3 shadow-subtle rounded-xl bg-white border cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md ${
+        data.isSelected
+          ? "border-indigo-600 ring-2 ring-indigo-400 shadow-md"
+          : "border-border hover:border-indigo-300"
+      } min-w-[220px] max-w-[260px]`}
+    >
       <Handle type="target" position={Position.Top} className="!bg-slate-400" />
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Gap Probe
+          Gap Probe (Click for Journey)
         </span>
         <Badge
           variant={isResolved ? "resolved" : isPersistent ? "persistent" : "developing"}
@@ -75,7 +83,12 @@ const nodeTypes = {
   misconception: MisconceptionNode,
 };
 
-export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodesData, topic }) => {
+export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
+  nodesData,
+  topic,
+  onSelectMisconception,
+  selectedMisconceptionId,
+}) => {
   const { flowNodes, flowEdges } = useMemo(() => {
     const conceptNodeItem = nodesData.find((n) => n.type === "concept") || {
       id: "concept_root",
@@ -107,7 +120,11 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodesData, topic
         id: mn.id,
         type: "misconception",
         position: { x: xPos, y: yPos },
-        data: { label: mn.label, status: mn.status },
+        data: {
+          label: mn.label,
+          status: mn.status,
+          isSelected: selectedMisconceptionId === mn.id,
+        },
       });
 
       edges.push({
@@ -124,7 +141,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodesData, topic
     });
 
     return { flowNodes: nodes, flowEdges: edges };
-  }, [nodesData, topic]);
+  }, [nodesData, topic, selectedMisconceptionId]);
 
   return (
     <div className="w-full h-[400px] sm:h-[460px] rounded-xl border border-border/80 bg-slate-50/50 overflow-hidden relative shadow-inner">
@@ -136,7 +153,12 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({ nodesData, topic
         fitViewOptions={{ padding: 0.2 }}
         nodesDraggable={false}
         nodesConnectable={false}
-        elementsSelectable={false}
+        elementsSelectable={true}
+        onNodeClick={(_, node) => {
+          if (node.type === "misconception" && onSelectMisconception) {
+            onSelectMisconception(node.id, node.data.label);
+          }
+        }}
       >
         <Background color="#cbd5e1" gap={16} size={1} />
         <Controls showInteractive={false} className="bg-white border border-border shadow-xs rounded-lg" />

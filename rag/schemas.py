@@ -23,6 +23,8 @@ class SourceItem(BaseModel):
     chunk_id: str
     relevance_score: float
     excerpt: str
+    source_type: str = "text"
+
 
 
 class RetrievedChunk(BaseModel):

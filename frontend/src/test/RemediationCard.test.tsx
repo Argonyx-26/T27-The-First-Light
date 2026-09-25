@@ -62,4 +62,37 @@ describe("RemediationCard Component", () => {
     expect(screen.getByText("sample_physics_notes.pdf — Page 2")).toBeInTheDocument();
     expect(screen.getByText(/Inertia is the natural tendency/)).toBeInTheDocument();
   });
+
+  it("renders grounded diagram & figure citation badge when source_type is image", () => {
+    const remediation: RemediationResponse = {
+      misconception_id: "free_body_confusion",
+      remediation_title: "Force Vectors in Equilibrium",
+      remediation_text: "Opposing vector arrows balance each other in equilibrium.",
+      grounded: true,
+      grounded_source: "physics_diagrams.pdf — Figure, Page 4",
+      page_number: 4,
+      sources: [
+        {
+          document_id: "doc_456",
+          document_name: "physics_diagrams.pdf",
+          page_number: 4,
+          excerpt: "[Figure Description - Page 4]: Vector diagram illustrating normal force balancing gravitational weight.",
+          similarity_score: 0.92,
+          source_type: "image",
+        },
+      ],
+    };
+
+    render(
+      <BrowserRouter>
+        <RemediationCard remediation={remediation} />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByText("Grounded in your study material")).toBeInTheDocument();
+    expect(screen.getByText("Diagram & Figure Citation")).toBeInTheDocument();
+    expect(screen.getByText("physics_diagrams.pdf — Figure, Page 4")).toBeInTheDocument();
+    expect(screen.getByText(/Vector diagram illustrating normal force/)).toBeInTheDocument();
+  });
 });
+

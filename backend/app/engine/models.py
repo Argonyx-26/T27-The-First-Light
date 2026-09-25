@@ -127,3 +127,37 @@ class ScoredQuestion(BaseModel):
     separation_score: float
     relevance_score: float
     confidence_gap_score: float
+
+
+class DailyRevisionQuestionItem(BaseModel):
+    question: Question
+    revision_type: str  # "persistent_misconception" | "spaced_recheck" | "confidence_calibration"
+    target_misconception_id: Optional[str] = None
+    target_misconception_label: Optional[str] = None
+    reason_description: str
+
+
+class DailyRevisionResponse(BaseModel):
+    session_id: str
+    topic: str
+    total_questions: int = 5
+    estimated_minutes: int = 10
+    questions: List[DailyRevisionQuestionItem]
+
+
+class RevisionItem(BaseModel):
+    concept: str
+    misconception: str
+    misconception_id: Optional[str] = None
+    status: str
+    recommended_review_in_days: int
+    summary: str
+    revision_priority: float = 0.0
+    questions_affected: int = 0
+
+
+class RevisionListResponse(BaseModel):
+    session_id: str
+    revision_items: List[RevisionItem]
+
+
