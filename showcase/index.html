@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Misconception Mapper (MM) — ARGONYX '26 Showcase</title>
+  <meta name="description" content="Traditional assessments score what students get wrong. Misconception Mapper diagnoses why through deterministic cognitive distractor analysis, multimodal RAG, and prescriptive learning paths.">
+  
+  <!-- Raah.dev Analytics Integration -->
+  <script
+    src="https://t.raah.dev/script.js"
+    data-pid="proj_twtlwj4zicph0ype"
+    data-domain="raah.dev"
+    async
+    defer
+  ></script>
+
+  <!-- Google Fonts & Tailwind CSS CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+              950: '#1e1b4b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glow-subtle {
+      box-shadow: 0 0 50px -10px rgba(99, 102, 241, 0.15);
+    }
+    .radial-bg {
+      background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.12) 0%, rgba(15, 23, 42, 0) 70%);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Navigation Bar -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div>
+          <span class="font-extrabold text-base tracking-tight text-white">Misconception Mapper</span>
+          <span class="ml-2 text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded-full">ARGONYX '26</span>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+        <a href="#problem" class="hover:text-white transition-colors">The Problem</a>
+        <a href="#loop" class="hover:text-white transition-colors">The Loop</a>
+        <a href="#features" class="hover:text-white transition-colors">Innovations</a>
+        <a href="#stack" class="hover:text-white transition-colors">Tech Stack</a>
+        <a href="#demo" class="hover:text-white transition-colors">Live App</a>
+      </nav>
+
+      <div class="flex items-center space-x-3">
+        <a href="http://localhost:5173/" target="_blank" class="text-xs font-bold px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-all flex items-center space-x-1.5">
+          <span>Launch Live App</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative pt-24 pb-20 overflow-hidden radial-bg">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+      
+      <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-700/80 text-xs font-semibold text-indigo-300 mb-2">
+        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+        <span>Team T27: The First Light • AI Diagnostic Architecture</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight sm:leading-none">
+        Your score is <span class="bg-gradient-to-r from-rose-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent">not the whole story.</span>
+      </h1>
+
+      <p class="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed font-normal">
+        Traditional exams only count what a student got wrong. <strong class="text-white font-semibold">Misconception Mapper (MM)</strong> uses deterministic distractor analysis, multimodal RAG textbook grounding, and Bayesian hypothesis convergence to diagnose <em class="text-indigo-300 not-italic font-semibold">why they got it wrong</em>.
+      </p>
+
+      <!-- Metric Pills -->
+      <div class="pt-6 flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-400">
+        <div class="px-4 py-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center space-x-2">
+          <span class="text-emerald-400 font-bold text-sm">100%</span>
+          <span>Deterministic Grading</span>
+        </div>
+        <div class="px-4 py-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center space-x-2">
+          <span class="text-indigo-400 font-bold text-sm">4-Category</span>
+          <span>Loss Taxonomy</span>
+        </div>
+        <div class="px-4 py-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center space-x-2">
+          <span class="text-amber-400 font-bold text-sm">5-Stage</span>
+          <span>Progress Journey</span>
+        </div>
+        <div class="px-4 py-2 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center space-x-2">
+          <span class="text-purple-400 font-bold text-sm">RAG OCR</span>
+          <span>Visual Figure Citations</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-center gap-3.5">
+        <a href="http://localhost:5173/topic" target="_blank" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-sm shadow-xl shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2">
+          <span>Start Diagnostic Practice</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </a>
+        <a href="http://localhost:5173/teacher/demo" target="_blank" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-sm transition-all flex items-center justify-center space-x-2">
+          <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span>View Same-Score Demo</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Statement Section -->
+  <section id="problem" class="py-20 border-t border-slate-800/80 bg-slate-900/40">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div class="max-w-3xl">
+        <span class="text-xs font-extrabold uppercase tracking-widest text-rose-400">The Problem We Solved</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mt-1">The Illusion of the Percentage Score</h2>
+        <p class="text-slate-400 text-sm sm:text-base mt-3 leading-relaxed">
+          In standard exams, two learners with identical 50% scores are treated identically. But their cognitive flaws are completely divergent:
+        </p>
+      </div>
+
+      <!-- Comparison Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Student Priya -->
+        <div class="p-6 rounded-2xl bg-slate-900 border border-rose-500/30 space-y-4 glow-subtle">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-rose-400">Learner A • Priya</span>
+              <h3 class="text-xl font-extrabold text-white mt-0.5">Score: 50% (3 / 6)</h3>
+            </div>
+            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+              Impetus Fallacy
+            </span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Believes moving objects store internal force that gets consumed. High confidence (5/5) in wrong answers. 
+            <strong class="text-rose-300 font-semibold block mt-1">Needs: Counter-example cognitive conflict to break the flawed mental model.</strong>
+          </p>
+          <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400 font-mono">
+            Diagnosis: Overconfidence Trap in Newton's 1st Law (p=0.88)
+          </div>
+        </div>
+
+        <!-- Student Aarav -->
+        <div class="p-6 rounded-2xl bg-slate-900 border border-amber-500/30 space-y-4 glow-subtle">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Learner B • Aarav</span>
+              <h3 class="text-xl font-extrabold text-white mt-0.5">Score: 50% (3 / 6)</h3>
+            </div>
+            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              Action-Reaction Confusion
+            </span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Thinks Newton's 3rd law pairs cancel each other out on the same object. Low confidence (2/5) with hesitation.
+            <strong class="text-amber-300 font-semibold block mt-1">Needs: Free-body diagram boundary separation and vector scaffolding.</strong>
+          </p>
+          <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400 font-mono">
+            Diagnosis: Third-Law Pair Cancellation (p=0.91)
+          </div>
+        </div>
+
+      </div>
+
+      <div class="p-5 rounded-2xl bg-gradient-to-r from-indigo-950/60 via-slate-900 to-indigo-950/60 border border-indigo-500/30 text-center">
+        <p class="text-xs sm:text-sm text-indigo-200">
+          Giving both students the same remedial worksheet guarantees failure. <strong class="text-white font-bold">Misconception Mapper creates completely individualized diagnostic and remediation trajectories.</strong>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Diagnostic Closed Loop Section -->
+  <section id="loop" class="py-20 border-t border-slate-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div class="text-center max-w-3xl mx-auto">
+        <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-400">Core Cognitive Engine</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mt-1">The 5-Stage Closed-Loop Architecture</h2>
+        <p class="text-slate-400 text-sm mt-3">
+          Every assessment interaction passes through a rigorous mathematical and cognitive pipeline.
+        </p>
+      </div>
+
+      <!-- Loop Visual Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        
+        <!-- Step 1 -->
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3 relative group hover:border-indigo-500/50 transition-all">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black text-xs">
+            1
+          </div>
+          <h4 class="text-sm font-bold text-white">Diagnostic Probing</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Distractor options are tagged to specific cognitive fallacies, not random wrong answers.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3 relative group hover:border-indigo-500/50 transition-all">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black text-xs">
+            2
+          </div>
+          <h4 class="text-sm font-bold text-white">Bayesian Evidence</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Prior hypothesis probabilities update deterministically with confidence-weighted likelihoods.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3 relative group hover:border-indigo-500/50 transition-all">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black text-xs">
+            3
+          </div>
+          <h4 class="text-sm font-bold text-white">Multimodal RAG</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Retrieves textbook figures and diagram captions via OCR and semantic vector search.
+          </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3 relative group hover:border-indigo-500/50 transition-all">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black text-xs">
+            4
+          </div>
+          <h4 class="text-sm font-bold text-white">Isomorphic Verify</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Presents counter-example verification challenges to confirm gap resolution without memorization.
+          </p>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3 relative group hover:border-indigo-500/50 transition-all">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-black text-xs">
+            5
+          </div>
+          <h4 class="text-sm font-bold text-white">Prescriptive Path</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Graph ranking unblocks downstream dependent concepts through 10-minute spaced revision.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Innovations / Features Grid -->
+  <section id="features" class="py-20 border-t border-slate-800/80 bg-slate-900/30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div class="max-w-3xl">
+        <span class="text-xs font-extrabold uppercase tracking-widest text-emerald-400">Engineering Innovations</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mt-1">Built for Rigorous Diagnostic Accuracy</h2>
+        <p class="text-slate-400 text-sm mt-3">
+          Designed from the ground up without LLM hallucinations on grading or arbitrary classifications.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Feature 1 -->
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center font-bold text-sm">
+            01
+          </div>
+          <h3 class="text-base font-bold text-white">Longitudinal Loss Attribution</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Classifies errors into 4 canonical categories: Conceptual, Overconfidence Traps, Formula Confusion, and Slips across all student history.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center font-bold text-sm">
+            02
+          </div>
+          <h3 class="text-base font-bold text-white">Prescriptive Learning Path</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Ranks gaps by downstream concepts blocked and revision priority. Directly spotlights Rank #1 targets on the interactive knowledge graph.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-bold text-sm">
+            03
+          </div>
+          <h3 class="text-base font-bold text-white">Multimodal RAG with Figure Citations</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Extracts diagrams and equations from textbooks using Tesseract OCR with LLM caption fallback, citing exact pages and figures in explanations.
+          </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center font-bold text-sm">
+            04
+          </div>
+          <h3 class="text-base font-bold text-white">5-Node Progress Journey</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Real-time per-misconception lifecycle: Diagnosed → Learned → Practiced → Verified → Mastered, computed dynamically without duplicated storage.
+          </p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center font-bold text-sm">
+            05
+          </div>
+          <h3 class="text-base font-bold text-white">Calibration Trajectory</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Longitudinal calibration tracking measuring whether high confidence aligns with actual correctness, preventing dangerous overconfidence traps.
+          </p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-bold text-sm">
+            06
+          </div>
+          <h3 class="text-base font-bold text-white">Teacher Cohort Heatmap</h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Provides classroom-wide metacognitive matrices, student drilldown profiles, and automated lesson-plan focus recommendations for educators.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack Architecture Section -->
+  <section id="stack" class="py-20 border-t border-slate-800/80">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      <div class="max-w-3xl">
+        <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-400">Technical Foundation</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-white mt-1">Modern, Type-Safe, Resilient Stack</h2>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+          <span class="text-slate-400 block font-mono">BACKEND</span>
+          <span class="text-white font-bold text-sm block">FastAPI + Python 3.10</span>
+          <span class="text-slate-500 text-[11px]">Strict Pydantic v2 schemas</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+          <span class="text-slate-400 block font-mono">FRONTEND</span>
+          <span class="text-white font-bold text-sm block">React 18 + TypeScript</span>
+          <span class="text-slate-500 text-[11px]">Vite, Tailwind, shadcn</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+          <span class="text-slate-400 block font-mono">PRIMARY AI</span>
+          <span class="text-white font-bold text-sm block">Groq LLaMA-3.3 70B</span>
+          <span class="text-slate-500 text-[11px]">Sub-500ms inference</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+          <span class="text-slate-400 block font-mono">FALLBACK AI</span>
+          <span class="text-white font-bold text-sm block">Google Gemini 2.5 Flash</span>
+          <span class="text-slate-500 text-[11px]">High-availability redundancy</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+          <span class="text-slate-400 block font-mono">VECTOR STORE</span>
+          <span class="text-white font-bold text-sm block">ChromaDB Persistent</span>
+          <span class="text-slate-500 text-[11px]">Cosine semantic chunking</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+          <span class="text-slate-400 block font-mono">VISUALIZATION</span>
+          <span class="text-white font-bold text-sm block">ReactFlow + Recharts</span>
+          <span class="text-slate-500 text-[11px]">Dynamic DAGs & calibration</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+          <span class="text-slate-400 block font-mono">IMAGE OCR</span>
+          <span class="text-white font-bold text-sm block">PyTesseract + Vision</span>
+          <span class="text-slate-500 text-[11px]">Multimodal textbook parsing</span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+          <span class="text-slate-400 block font-mono">ANALYTICS</span>
+          <span class="text-white font-bold text-sm block">Raah.dev Telemetry</span>
+          <span class="text-slate-500 text-[11px]">Privacy-preserving metrics</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Demo & Interactive Showcase Portal -->
+  <section id="demo" class="py-20 border-t border-slate-800/80 bg-slate-900/50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-center">
+      <div class="max-w-2xl mx-auto space-y-3">
+        <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-400">Live Evaluation</span>
+        <h2 class="text-3xl sm:text-4xl font-black text-white">Experience Misconception Mapper</h2>
+        <p class="text-slate-400 text-sm">
+          Run any of the end-to-end interactive workflows built for ARGONYX '26.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
+        
+        <a href="http://localhost:5173/topic" target="_blank" class="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500 transition-all block group">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block mb-1">Student Portal</span>
+          <h4 class="text-base font-bold text-white group-hover:text-indigo-300">Adaptive Practice</h4>
+          <p class="text-xs text-slate-400 mt-2">
+            Experience distractor-driven diagnosis, immediate RAG grounding, and counter-example challenges.
+          </p>
+          <span class="text-xs font-bold text-indigo-400 mt-4 inline-flex items-center">Launch →</span>
+        </a>
+
+        <a href="http://localhost:5173/exam" target="_blank" class="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500 transition-all block group">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 block mb-1">Exam Mode</span>
+          <h4 class="text-base font-bold text-white group-hover:text-rose-300">Prelims Simulator</h4>
+          <p class="text-xs text-slate-400 mt-2">
+            Timed 12-question competitive assessment delivering comprehensive 'Why You Lost Marks' post-mortem.
+          </p>
+          <span class="text-xs font-bold text-rose-400 mt-4 inline-flex items-center">Launch →</span>
+        </a>
+
+        <a href="http://localhost:5173/knowledge-gaps" target="_blank" class="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500 transition-all block group">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">Knowledge Map</span>
+          <h4 class="text-base font-bold text-white group-hover:text-amber-300">Prescriptive Path</h4>
+          <p class="text-xs text-slate-400 mt-2">
+            Interactive ReactFlow concept graph with Rank #1 highlighted targets and 5-stage progress journeys.
+          </p>
+          <span class="text-xs font-bold text-amber-400 mt-4 inline-flex items-center">Launch →</span>
+        </a>
+
+        <a href="http://localhost:5173/teacher/demo" target="_blank" class="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500 transition-all block group">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block mb-1">Teacher Suite</span>
+          <h4 class="text-base font-bold text-white group-hover:text-emerald-300">Same-Score Demo</h4>
+          <p class="text-xs text-slate-400 mt-2">
+            Live side-by-side demonstration comparing Priya and Aarav's identical scores and opposite diagnoses.
+          </p>
+          <span class="text-xs font-bold text-emerald-400 mt-4 inline-flex items-center">Launch →</span>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-slate-800/80 bg-slate-950 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <span class="font-bold text-slate-300">Misconception Mapper (MM)</span> • Built for ARGONYX '26
+        <p class="text-slate-500 mt-0.5">Team T27: The First Light • Deterministic Cognitive Diagnostic Assistant</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span>FastAPI + SQLite</span>
+        <span>•</span>
+        <span>Groq LLaMA-3.3 70B</span>
+        <span>•</span>
+        <span>React 18</span>
+        <span>•</span>
+        <span>Raah.dev</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

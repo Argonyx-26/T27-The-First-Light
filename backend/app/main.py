@@ -42,6 +42,14 @@ app.add_middleware(
 # Mount core REST endpoints
 app.include_router(api_router)
 
+# Mount Showcase static directory if available
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
+showcase_dir = Path(__file__).resolve().parent.parent.parent / "showcase"
+if showcase_dir.exists():
+    app.mount("/showcase", StaticFiles(directory=str(showcase_dir), html=True), name="showcase")
+
 
 @app.get("/health", tags=["System"])
 def health_check():
@@ -51,3 +59,4 @@ def health_check():
         "environment": settings.ENVIRONMENT,
         "llm_mode": settings.LLM_MODE,
     }
+
