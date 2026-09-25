@@ -22,6 +22,7 @@ class CreateSessionRequest(BaseModel):
     topic: str = Field(..., description="Subject or concept topic (e.g. 'Newton\'s Laws')")
     student_id: Optional[str] = Field(default=None, description="Optional student identifier")
     mode: str = Field(default="adaptive_diagnosis", description="'adaptive_diagnosis' or 'exam_mode'")
+    session_length: Optional[int] = Field(default=None, description="Total questions: 10, 20, or None (unlimited)")
 
 
 class CreateSessionResponse(BaseModel):
@@ -29,7 +30,78 @@ class CreateSessionResponse(BaseModel):
     student_id: str
     topic: str
     status: str
+    session_length: Optional[int] = None
     created_at: str
+
+
+class ActiveSessionSummary(BaseModel):
+    session_id: str
+    student_id: str
+    topic: str
+    status: str
+    session_length: Optional[int] = None
+    current_question_index: int = 1
+    evidence_count: int = 0
+    active_hypotheses_count: int = 0
+    mastery_score: float = 0.0
+    updated_at: str
+
+
+class ActiveSessionListResponse(BaseModel):
+    sessions: List[ActiveSessionSummary]
+
+
+class SessionDetailResponse(BaseModel):
+    session_id: str
+    student_id: str
+    topic: str
+    status: str
+    mode: str
+    session_length: Optional[int] = None
+    current_question_index: int = 1
+    mastery_score: float = 0.0
+    current_question: Optional[Question] = None
+    active_hypotheses: List[Hypothesis] = Field(default_factory=list)
+    evidence_count: int = 0
+    created_at: str
+    updated_at: str
+
+
+class QuizHistoryItem(BaseModel):
+    session_id: str
+    topic: str
+    question_count: int
+    score: float
+    date: str
+    status: str = "completed"
+
+
+class TopicHistoryGroup(BaseModel):
+    topic: str
+    attempt_count: int
+    average_score: float
+    latest_date: str
+    attempts: List[QuizHistoryItem]
+
+
+class ExamHistoryItem(BaseModel):
+    exam_id: str
+    topic: str
+    score: int
+    total_questions: int
+    percentage: float
+    accuracy: float
+    time_taken_seconds: int
+    date: str
+    status: str
+
+
+class StudentHistoryResponse(BaseModel):
+    student_id: str
+    total_completed: int
+    topics: List[TopicHistoryGroup]
+    history: List[QuizHistoryItem]
+    exams: List[ExamHistoryItem] = Field(default_factory=list)
 
 
 # ==============================================================================
@@ -109,6 +181,14 @@ class SourceItem(BaseModel):
 
 
 
+class VideoSnippet(BaseModel):
+    title: str = Field(..., description="Educational clip title")
+    youtube_video_id: str = Field(..., description="YouTube video ID")
+    start_seconds: int = Field(default=0, description="Start timestamp in seconds")
+    end_seconds: Optional[int] = Field(default=None, description="End timestamp in seconds")
+    concept_summary: str = Field(..., description="Key concept addressed in this segment")
+
+
 class RemediateRequest(BaseModel):
     session_id: str
     misconception_id: str
@@ -126,6 +206,9 @@ class RemediateResponse(BaseModel):
     grounded_source: Optional[str] = None
     page_number: Optional[int] = None
     sources: List[SourceItem] = Field(default_factory=list)
+    feynman_explanation: Optional[str] = None
+    visual_artifact_svg: Optional[str] = None
+    video_snippet: Optional[VideoSnippet] = None
 
 
 class DocumentMetadata(BaseModel):
@@ -136,7 +219,25 @@ class DocumentMetadata(BaseModel):
     chunk_count: int
     status: str
     topic: Optional[str] = None
+    preview_excerpt: Optional[str] = None
     uploaded_at: datetime
+
+
+class GenerateDocQuizRequest(BaseModel):
+    document_id: str = Field(..., description="ID of the ingested document")
+    scope: str = Field(default="all", description="'all' (whole document) or 'chapter' (chapter/topic)")
+    chapter_or_topic: Optional[str] = Field(default=None, description="Topic or chapter to scope questions to")
+    session_id: Optional[str] = Field(default=None, description="Optional active session ID")
+    count: int = Field(default=3, ge=1, le=20, description="Number of questions to generate")
+
+
+class DocPreviewResponse(BaseModel):
+    document_id: str
+    filename: str
+    page_count: int
+    chunk_count: int
+    topic: Optional[str] = None
+    preview_excerpt: str
 
 
 class DocumentListResponse(BaseModel):
@@ -463,9 +564,9 @@ class SameScoreDemoResponse(BaseModel):
 # 9. Exam Mode Schemas
 # ==============================================================================
 class CreateExamRequest(BaseModel):
-    topic: str = Field(..., description="'Newton\\'s Laws', 'Kinematics', 'Chemical Bonding', or 'Comprehensive Science'")
-    question_count: int = Field(default=12, ge=10, le=15, description="Number of questions (10, 12, or 15)")
-    time_limit_minutes: int = Field(default=20, ge=5, le=60, description="Time limit in minutes")
+    topic: str = Field(..., description="Target exam topic (e.g. 'Linear Search', 'Newton\\'s Laws', 'Chemical Bonding')")
+    question_count: int = Field(default=12, ge=3, le=30, description="Total questions (will be evenly partitioned across Easy, Medium, Hard)")
+    time_limit_minutes: int = Field(default=20, ge=5, le=180, description="Time limit in minutes")
     student_id: Optional[str] = Field(default=None, description="Optional student identifier")
 
 
@@ -535,6 +636,9 @@ class ExamQuestionReportDetail(BaseModel):
     explanation: str
     remediation_preview: Optional[str] = None
     time_spent_seconds: int = 0
+    visual_artifact_svg: Optional[str] = None
+    feynman_explanation: Optional[str] = None
+    status_change: Optional[str] = None
 
 
 class ExamMisconceptionItem(BaseModel):

@@ -19,17 +19,20 @@ class Settings(BaseSettings):
 
     # LLM Settings
     # Mode can be "live" (uses Groq/Gemini APIs) or "mock" (offline deterministic fixtures)
-    LLM_MODE: str = "mock"
+    LLM_MODE: str = "live"
 
-    # Primary LLM: Groq
+    # Primary LLM: Groq (Questions & Distractors)
     GROQ_API_KEY: Optional[str] = None
-    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    GROQ_MODEL: str = "openai/gpt-oss-120b"
     GROQ_API_URL: str = "https://api.groq.com/openai/v1/chat/completions"
 
-    # Fallback LLM: Google Gemini
+    # Remediation & Multimodal Vision: Google Gemini
     GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-1.5-flash"
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
     GEMINI_API_URL: str = "https://generativelanguage.googleapis.com/v1beta/models"
+
+    # YouTube Data API v3 (Educational Video Retrieval)
+    YOUTUBE_API_KEY: Optional[str] = None
 
     # CORS
     CORS_ORIGINS: List[str] = [
@@ -40,7 +43,7 @@ class Settings(BaseSettings):
     ]
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "backend/.env", "../.env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )

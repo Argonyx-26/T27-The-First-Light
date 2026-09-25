@@ -64,6 +64,72 @@ export interface SubmitAnswerResponse {
   diagnosis?: DiagnosisSummary | null;
 }
 
+export interface ActiveSessionSummary {
+  session_id: string;
+  student_id: string;
+  topic: string;
+  status: string;
+  session_length?: number | null;
+  current_question_index: number;
+  evidence_count: number;
+  active_hypotheses_count: number;
+  mastery_score: number;
+  updated_at: string;
+}
+
+export interface SessionDetailResponse {
+  session_id: string;
+  student_id: string;
+  topic: string;
+  status: string;
+  mode: string;
+  session_length?: number | null;
+  current_question_index: number;
+  mastery_score: number;
+  current_question?: Question | null;
+  active_hypotheses: Hypothesis[];
+  evidence_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuizHistoryItem {
+  session_id: string;
+  topic: string;
+  question_count: number;
+  score: number;
+  date: string;
+  status: string;
+}
+
+export interface TopicHistoryGroup {
+  topic: string;
+  attempt_count: number;
+  average_score: number;
+  latest_date: string;
+  attempts: QuizHistoryItem[];
+}
+
+export interface ExamHistoryItem {
+  exam_id: string;
+  topic: string;
+  score: number;
+  total_questions: number;
+  percentage: number;
+  accuracy: number;
+  time_taken_seconds: number;
+  date: string;
+  status: string;
+}
+
+export interface StudentHistoryResponse {
+  student_id: string;
+  total_completed: number;
+  topics: TopicHistoryGroup[];
+  history: QuizHistoryItem[];
+  exams?: ExamHistoryItem[];
+}
+
 export interface SourceItem {
   document_id: string;
   document_name: string;
@@ -73,6 +139,14 @@ export interface SourceItem {
   source_type?: 'text' | 'image' | string;
 }
 
+
+export interface VideoSnippet {
+  title: string;
+  youtube_video_id: string;
+  start_seconds: number;
+  end_seconds?: number | null;
+  concept_summary: string;
+}
 
 export interface RemediationResponse {
   misconception_id: string;
@@ -85,6 +159,9 @@ export interface RemediationResponse {
   grounded_source?: string | null;
   page_number?: number | null;
   sources?: SourceItem[];
+  feynman_explanation?: string | null;
+  visual_artifact_svg?: string | null;
+  video_snippet?: VideoSnippet | null;
 }
 
 export interface DocumentMetadata {
@@ -95,7 +172,35 @@ export interface DocumentMetadata {
   chunk_count: number;
   status: "processing" | "ready" | "failed" | string;
   topic?: string | null;
+  preview_excerpt?: string | null;
   uploaded_at: string;
+}
+
+export interface GenerateDocQuizRequest {
+  document_id: string;
+  scope?: "all" | "chapter";
+  chapter_or_topic?: string | null;
+  session_id?: string | null;
+  count?: number;
+}
+
+export interface DocPreviewResponse {
+  document_id: string;
+  filename: string;
+  page_count: number;
+  chunk_count: number;
+  topic?: string | null;
+  preview_excerpt: string;
+}
+
+export interface UploadProgressEvent {
+  stage: "uploading" | "extracting" | "chunking" | "indexing" | "ready" | "failed" | string;
+  progress: number;
+  message: string;
+  document_id?: string;
+  filename?: string;
+  page_count?: number;
+  chunk_count?: number;
 }
 
 export interface DocumentListResponse {
@@ -496,6 +601,9 @@ export interface ExamQuestionReportDetail {
   explanation: string;
   remediation_preview?: string | null;
   time_spent_seconds: number;
+  visual_artifact_svg?: string | null;
+  feynman_explanation?: string | null;
+  status_change?: string | null;
 }
 
 export interface ExamMisconceptionItem {

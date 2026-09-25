@@ -6,15 +6,21 @@ interface ProgressIndicatorProps {
   evidenceCount: number;
   masteryLevel: number;
   isDiagnosing?: boolean;
+  sessionLength?: number | null;
+  currentIndex?: number;
 }
 
 export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
   evidenceCount,
   masteryLevel,
   isDiagnosing = false,
+  sessionLength,
+  currentIndex,
 }) => {
-  // Approximate adaptive progress based on evidence pieces gathered
-  const calculatedProgress = Math.min(100, Math.max(15, (evidenceCount / 3) * 100));
+  // Calculate progress based on question limit if set, or evidence pieces gathered
+  const calculatedProgress = sessionLength
+    ? Math.min(100, Math.max(10, ((currentIndex || 1) / sessionLength) * 100))
+    : Math.min(100, Math.max(15, (evidenceCount / 3) * 100));
 
   return (
     <div className="w-full space-y-2 bg-white p-3.5 rounded-xl border border-border/70 shadow-xs">
@@ -24,7 +30,17 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
           <span>{isDiagnosing ? "Diagnostic Focus Active" : "Adaptive Assessment"}</span>
         </div>
         <div className="flex items-center space-x-2 text-muted-foreground">
-          <span>Evidence points: <strong className="text-slate-800 font-semibold">{evidenceCount}</strong></span>
+          {sessionLength ? (
+            <span className="font-semibold text-slate-800">
+              Q{currentIndex || 1} of {sessionLength}
+            </span>
+          ) : (
+            <span className="font-semibold text-slate-800">
+              Q{currentIndex || 1} (Unlimited)
+            </span>
+          )}
+          <span>•</span>
+          <span>Evidence: <strong className="text-slate-800 font-semibold">{evidenceCount}</strong></span>
           <span>•</span>
           <span className="flex items-center text-emerald-700 font-medium">
             <ShieldCheck className="w-3.5 h-3.5 mr-0.5 inline" />

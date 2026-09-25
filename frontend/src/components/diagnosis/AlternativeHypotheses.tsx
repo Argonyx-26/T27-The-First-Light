@@ -21,8 +21,8 @@ export const AlternativeHypotheses: React.FC<AlternativeHypothesesProps> = ({ al
             className="flex items-center justify-between p-3 rounded-lg border border-border/70 bg-white text-xs"
           >
             <span className="text-slate-700 font-medium truncate mr-2">{alt.name}</span>
-            <span className="text-muted-foreground font-semibold flex-shrink-0">
-              {Math.round(alt.probability * 100)}%
+            <span className="text-slate-500 font-medium flex-shrink-0 bg-slate-100 px-2 py-0.5 rounded text-[11px]">
+              Ruled Out / Secondary
             </span>
           </div>
         ))}

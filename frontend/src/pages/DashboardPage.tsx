@@ -167,12 +167,12 @@ export const DashboardPage: React.FC = () => {
                 Target Concept
               </span>
               <h4 className="text-sm font-bold text-slate-900">
-                {topic || "Newton's First Law"}
+                {topic || "Active Concept"}
               </h4>
               <p className="text-xs text-slate-600 leading-snug">
                 {data.misconceptions_resolved > 0
                   ? "Great job resolving foundational gaps! Keep practicing new transfer problems to maintain mastery."
-                  : "Focus on distinguishing continuous force from acceleration. Remember net force changes speed, not maintains it."}
+                  : "Focus on mastering core principles and verifying assumptions step by step."}
               </p>
             </div>
 

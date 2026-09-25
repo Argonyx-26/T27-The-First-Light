@@ -12,6 +12,8 @@ import {
   Sparkles,
   GraduationCap,
   Layers,
+  History,
+  Library,
 } from "lucide-react";
 import { useSession } from "@/context/SessionContext";
 import { Badge } from "@/components/ui/Badge";
@@ -32,10 +34,12 @@ export const Navbar: React.FC = () => {
 
   const studentLinks: NavItem[] = [
     { name: "Practice", path: "/topic", icon: BookOpen },
+    { name: "Library", path: "/library", icon: Library },
     { name: "Exam Mode", path: "/exam", icon: GraduationCap },
     { name: "Knowledge Gaps", path: "/knowledge-gaps", icon: GitFork },
     { name: "Dashboard", path: "/dashboard", icon: BarChart3 },
     { name: "Revision", path: "/revision", icon: ListFilter },
+    { name: "History", path: "/history", icon: History },
   ];
 
   const teacherLinks: NavItem[] = [

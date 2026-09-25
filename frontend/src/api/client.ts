@@ -4,6 +4,7 @@
  */
 
 import {
+  ActiveSessionSummary,
   CreateExamRequest,
   DailyRevisionResponse,
   DashboardResponse,
@@ -15,8 +16,13 @@ import {
   RemediationResponse,
   RevisionListResponse,
   SameScoreDemoResponse,
+  SessionDetailResponse,
   StudentDetailProfileResponse,
+  StudentHistoryResponse,
   SubmitAnswerResponse,
+  DocPreviewResponse,
+  GenerateDocQuizRequest,
+  UploadProgressEvent,
   TeacherAnalyticsResponse,
   TeacherMisconceptionsResponse,
   TeacherOverviewResponse,
@@ -69,17 +75,65 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const api = {
   /**
-   * Initializes a new student session.
+   * Initializes a new student session with optional question count.
    */
-  async createSession(topic: string, studentId?: string): Promise<{ session_id: string; topic: string }> {
-    return request<{ session_id: string; topic: string }>("/session", {
+  async createSession(
+    topic: string,
+    sessionLength?: number | null,
+    studentId?: string
+  ): Promise<{ session_id: string; topic: string; session_length?: number | null }> {
+    return request<{ session_id: string; topic: string; session_length?: number | null }>("/session", {
       method: "POST",
       body: JSON.stringify({
         topic,
         student_id: studentId || `student_${Date.now().toString(36)}`,
         mode: "adaptive_diagnosis",
+        session_length: sessionLength ?? null,
       }),
     });
+  },
+
+  /**
+   * Lists active or paused sessions for student.
+   */
+  async getActiveSessions(studentId?: string): Promise<{ sessions: ActiveSessionSummary[] }> {
+    const q = studentId ? `?student_id=${encodeURIComponent(studentId)}` : "";
+    return request<{ sessions: ActiveSessionSummary[] }>(`/sessions/active${q}`);
+  },
+
+  /**
+   * Retrieves full session state.
+   */
+  async getSession(sessionId: string): Promise<SessionDetailResponse> {
+    return request<SessionDetailResponse>(`/session/${sessionId}`);
+  },
+
+  /**
+   * Pauses an active session.
+   */
+  async pauseSession(sessionId: string): Promise<SessionDetailResponse> {
+    return request<SessionDetailResponse>(`/session/${sessionId}/pause`, { method: "POST" });
+  },
+
+  /**
+   * Resumes a paused session.
+   */
+  async resumeSession(sessionId: string): Promise<SessionDetailResponse> {
+    return request<SessionDetailResponse>(`/session/${sessionId}/resume`, { method: "POST" });
+  },
+
+  /**
+   * Ends an active session.
+   */
+  async endSession(sessionId: string): Promise<SessionDetailResponse> {
+    return request<SessionDetailResponse>(`/session/${sessionId}/end`, { method: "POST" });
+  },
+
+  /**
+   * Retrieves quiz completion history for a student.
+   */
+  async getHistory(studentId: string = "student_default"): Promise<StudentHistoryResponse> {
+    return request<StudentHistoryResponse>(`/history/${encodeURIComponent(studentId)}`);
   },
 
   /**
@@ -165,6 +219,91 @@ export const api = {
       console.error("API Error on [POST /rag/upload]:", error);
       throw error;
     }
+  },
+
+  /**
+   * Uploads study material with real-time stage progress updates from backend SSE/NDJSON stream.
+   * Stages: Uploading -> Extracting -> Chunking -> Indexing -> Ready.
+   */
+  async uploadDocumentWithProgress(
+    file: File,
+    topic?: string,
+    onProgress?: (event: UploadProgressEvent) => void
+  ): Promise<UploadProgressEvent> {
+    const formData = new FormData();
+    formData.append("file", file);
+    if (topic) {
+      formData.append("topic", topic);
+    }
+
+    const url = `${BASE_URL}/rag/upload?stream=true`;
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed with HTTP ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error("ReadableStream not supported");
+    }
+
+    const decoder = new TextDecoder();
+    let lastEvent: UploadProgressEvent = { stage: "ready", progress: 100, message: "Done" };
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const parsed = JSON.parse(line) as UploadProgressEvent;
+          lastEvent = parsed;
+          if (onProgress) {
+            onProgress(parsed);
+          }
+        } catch {
+          // ignore non-json line
+        }
+      }
+    }
+
+    if (buffer.trim()) {
+      try {
+        const parsed = JSON.parse(buffer) as UploadProgressEvent;
+        lastEvent = parsed;
+        if (onProgress) {
+          onProgress(parsed);
+        }
+      } catch {}
+    }
+
+    return lastEvent;
+  },
+
+  /**
+   * Retrieves document preview metadata and first-page text excerpt.
+   */
+  async getDocumentPreview(documentId: string): Promise<DocPreviewResponse> {
+    return request<DocPreviewResponse>(`/rag/documents/${encodeURIComponent(documentId)}/preview`);
+  },
+
+  /**
+   * Generates diagnostic quiz questions scoped to an uploaded document.
+   */
+  async generateDocQuiz(params: GenerateDocQuizRequest): Promise<{ session_id: string; questions: Question[] }> {
+    return request<{ session_id: string; questions: Question[] }>("/rag/generate-quiz", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
   },
 
   /**

@@ -134,6 +134,36 @@ def test_submit_wrong_answer_initiates_diagnosis(client):
     assert data["status"] in ("diagnosing", "confirmed")
     assert "active_hypotheses" in data
     assert len(data["active_hypotheses"]) >= 2
+    assert data["diagnosis"] is not None
+    assert "primary_misconception" in data["diagnosis"]
+    assert "evidence" in data["diagnosis"]
+    assert len(data["diagnosis"]["evidence"]) >= 1
+
+
+def test_submit_wrong_answer_diagnosing_provisional_payload(client):
+    sess_res = client.post("/session", json={"topic": "Newton's Laws"})
+    session_id = sess_res.json()["session_id"]
+
+    # Student chooses Option A with low confidence 1 so threshold is not immediately passed
+    res = client.post(
+        "/submit-answer",
+        json={
+            "session_id": session_id,
+            "question_id": "physics_newton_q01",
+            "selected_option": "A",
+            "confidence": 1,
+        },
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["evaluation"] == "incorrect"
+    assert data["status"] == "diagnosing"
+    assert data["diagnosis"] is not None
+    assert data["diagnosis"]["confirmed"] is False
+    assert data["diagnosis"]["primary_misconception"]["name"] is not None
+    assert len(data["diagnosis"]["evidence"]) >= 1
+    assert data["next_question"] is not None
+    assert len(data["active_hypotheses"]) >= 2
 
 
 def test_submit_answer_validation_errors(client):

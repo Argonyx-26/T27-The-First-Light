@@ -71,6 +71,7 @@ Observed Student Evidence:
 
 Provide targeted remediation to repair this specific mental model.
 Explain *why* the student's intuition feels right in daily experience, but *why* it fails in science, and give an intuitive analogy. Ground your explanation in the reference material when provided.
+Also provide a Feynman Technique breakdown: explain the idea as if teaching a bright 12-year-old, using zero jargon and crystal-clear everyday comparisons.
 
 Respond ONLY with a JSON object in this exact schema:
 {{
@@ -79,7 +80,8 @@ Respond ONLY with a JSON object in this exact schema:
   "remediation_text": "Clear explanation of the conceptual misunderstanding and the correct principle.",
   "example": "A memorable real-world analogy or counter-intuitive thought experiment.",
   "key_takeaway": "A concise one-sentence rule the student can apply immediately.",
-  "check_for_understanding": "A short self-reflective question prompting the student to verify their new understanding."
+  "check_for_understanding": "A short self-reflective question prompting the student to verify their new understanding.",
+  "feynman_explanation": "Feynman Technique explanation: explain simply to a 12-year-old using clear everyday analogies and zero technical jargon."
 }}
 """
 

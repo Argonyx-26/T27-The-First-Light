@@ -16,35 +16,38 @@ export const HypothesisBars: React.FC<HypothesisBarsProps> = ({ hypotheses, prim
   return (
     <div className="space-y-3.5">
       <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-        <span>Hypothesis Narrowing</span>
-        <span>Evidential Confidence</span>
+        <span>Analyzed Thinking Patterns</span>
+        <span>Assessment Focus</span>
       </div>
 
       <div className="space-y-3">
         {sorted.map((h) => {
           const isPrimary = h.id === primaryId || (primaryId === undefined && h === sorted[0]);
-          const percent = Math.round(h.probability * 100);
+          const barWidth = isPrimary ? 85 : Math.max(25, Math.round(h.probability * 100));
 
           return (
             <div key={h.id} className="space-y-1.5">
               <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className={isPrimary ? "font-semibold text-slate-900" : "text-slate-600 font-medium"}>
                   {h.label}
-                  {isPrimary && (
-                    <span className="ml-2 text-[11px] text-indigo-700 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded font-medium">
-                      Dominant Pattern
+                </span>
+                <span className="flex-shrink-0">
+                  {isPrimary ? (
+                    <span className="text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+                      Primary Candidate
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
+                      Alternative Concept
                     </span>
                   )}
                 </span>
-                <span className={isPrimary ? "font-bold text-indigo-700" : "text-muted-foreground font-medium"}>
-                  {percent}%
-                </span>
               </div>
 
-              <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${percent}%` }}
+                  animate={{ width: `${barWidth}%` }}
                   transition={{ duration: 0.6, ease: "easeOut" }}
                   className={`h-full rounded-full ${
                     isPrimary ? "bg-indigo-600" : "bg-slate-300"

@@ -8,11 +8,18 @@ from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from app.core.config import settings
 
 
+from pathlib import Path
+
 # SQLite connection args (check_same_thread=False allows FastAPI multi-threaded requests)
 connect_args = {"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
 
+db_url = settings.DATABASE_URL
+if db_url.startswith("sqlite:///./") or db_url == "sqlite:///misconception_mapper.db":
+    backend_db_path = (Path(__file__).resolve().parent.parent.parent / "misconception_mapper.db").resolve()
+    db_url = f"sqlite:///{backend_db_path.as_posix()}"
+
 engine = create_engine(
-    settings.DATABASE_URL,
+    db_url,
     connect_args=connect_args,
     echo=False,
 )
@@ -39,5 +46,25 @@ def init_db() -> None:
             conn.execute(text("ALTER TABLE misconception_states ADD COLUMN revision_priority FLOAT DEFAULT 0.0"))
             conn.commit()
         except Exception:
-            pass  # Column already exists
+            pass
+        try:
+            conn.execute(text("ALTER TABLE sessions ADD COLUMN session_length INTEGER"))
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE sessions ADD COLUMN final_score FLOAT"))
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE sessions ADD COLUMN completed_at DATETIME"))
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE documents ADD COLUMN preview_text TEXT"))
+            conn.commit()
+        except Exception:
+            pass
 

@@ -12,6 +12,8 @@ import {
 interface SessionContextType {
   sessionId: string | null;
   topic: string | null;
+  sessionLength: number | null;
+  currentQuestionIndex: number;
   currentQuestion: Question | null;
   verificationQuestion: Question | null;
   activeHypotheses: Hypothesis[];
@@ -29,8 +31,11 @@ interface SessionContextType {
   } | null;
 
   // Methods
-  startSession: (topic: string) => Promise<void>;
+  startSession: (topic: string, sessionLength?: number | null) => Promise<void>;
   submitAnswer: (option: string, confidence: number) => Promise<SubmitAnswerResponse>;
+  pauseSession: () => Promise<void>;
+  resumeSession: (sessionId: string) => Promise<void>;
+  endSession: () => Promise<void>;
   fetchRemediation: () => Promise<RemediationResponse>;
   submitVerification: (option: string) => Promise<VerifyResponse>;
   clearSession: () => void;
@@ -41,6 +46,8 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 const STORAGE_SESSION_KEY = "mm_session_id";
 const STORAGE_TOPIC_KEY = "mm_topic";
+const STORAGE_LENGTH_KEY = "mm_session_length";
+const STORAGE_INDEX_KEY = "mm_question_index";
 
 export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [sessionId, setSessionId] = useState<string | null>(() => {
@@ -48,6 +55,15 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   });
   const [topic, setTopic] = useState<string | null>(() => {
     return sessionStorage.getItem(STORAGE_TOPIC_KEY) || null;
+  });
+
+  const [sessionLength, setSessionLength] = useState<number | null>(() => {
+    const stored = sessionStorage.getItem(STORAGE_LENGTH_KEY);
+    return stored ? parseInt(stored, 10) : null;
+  });
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(() => {
+    const stored = sessionStorage.getItem(STORAGE_INDEX_KEY);
+    return stored ? parseInt(stored, 10) : 1;
   });
 
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -84,16 +100,40 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     }
   }, [topic]);
 
+  // Sync session length and index to sessionStorage
+  useEffect(() => {
+    if (sessionLength !== null) {
+      sessionStorage.setItem(STORAGE_LENGTH_KEY, String(sessionLength));
+    } else {
+      sessionStorage.removeItem(STORAGE_LENGTH_KEY);
+    }
+  }, [sessionLength]);
+
+  useEffect(() => {
+    sessionStorage.setItem(STORAGE_INDEX_KEY, String(currentQuestionIndex));
+  }, [currentQuestionIndex]);
+
   /**
    * Starts a new adaptive diagnostic session.
    */
-  const startSession = async (chosenTopic: string) => {
+  const startSession = async (chosenTopic: string, chosenLength?: number | null) => {
     setIsLoading(true);
     setError(null);
     try {
-      const sessionRes = await api.createSession(chosenTopic);
+      const lengthVal = chosenLength !== undefined ? chosenLength : null;
+      let studentId = typeof window !== "undefined" ? localStorage.getItem("mm_student_id") : null;
+      if (!studentId && typeof window !== "undefined") {
+        studentId = `student_${Math.random().toString(36).substring(2, 10)}`;
+        localStorage.setItem("mm_student_id", studentId);
+      }
+      const sessionRes = await api.createSession(chosenTopic, lengthVal);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("mm_student_id", (sessionRes as any).student_id || studentId || "student_active");
+      }
       setSessionId(sessionRes.session_id);
       setTopic(chosenTopic);
+      setSessionLength(lengthVal);
+      setCurrentQuestionIndex(1);
       setMasteryLevel(0);
       setEvidenceCount(0);
       setActiveHypotheses([]);
@@ -118,6 +158,73 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   /**
+   * Pauses the active session saving progress on backend.
+   */
+  const pauseSession = async () => {
+    if (!sessionId) return;
+    setIsLoading(true);
+    try {
+      await api.pauseSession(sessionId);
+    } catch (err: any) {
+      console.error("Failed to pause session:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Resumes an existing active or paused session exactly as it was.
+   */
+  const resumeSession = async (targetSessionId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const detail = await api.resumeSession(targetSessionId);
+      setSessionId(detail.session_id);
+      setTopic(detail.topic);
+      setSessionLength(detail.session_length ?? null);
+      setCurrentQuestionIndex(detail.current_question_index || 1);
+      setMasteryLevel(detail.mastery_score || 0);
+      setEvidenceCount(detail.evidence_count || 0);
+      setActiveHypotheses(detail.active_hypotheses || []);
+      setLatestDiagnosis(null);
+      setLatestRemediation(null);
+      setLatestVerification(null);
+      setLastAnswerResult(null);
+
+      if (detail.current_question) {
+        setCurrentQuestion(detail.current_question);
+      } else {
+        const quiz = await api.generateQuiz(detail.topic, detail.session_id, 3);
+        if (quiz.questions && quiz.questions.length > 0) {
+          setCurrentQuestion(quiz.questions[0]);
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to resume session.");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Ends the active session cleanly.
+   */
+  const endSession = async () => {
+    if (!sessionId) return;
+    setIsLoading(true);
+    try {
+      await api.endSession(sessionId);
+      clearSession();
+    } catch (err: any) {
+      console.error("Failed to end session:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
    * Submits student answer and confidence level.
    */
   const submitAnswer = async (option: string, confidence: number): Promise<SubmitAnswerResponse> => {
@@ -135,14 +242,16 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
       });
       setMasteryLevel(res.mastery_level);
       setEvidenceCount((prev) => prev + 1);
+      setCurrentQuestionIndex((prev) => prev + 1);
 
       if (res.active_hypotheses) {
         setActiveHypotheses(res.active_hypotheses);
       }
 
-      if (res.status === "confirmed" && res.diagnosis) {
+      if (res.diagnosis) {
         setLatestDiagnosis(res.diagnosis);
-      } else if (res.next_question) {
+      }
+      if (res.next_question) {
         setCurrentQuestion(res.next_question);
       }
 
@@ -172,7 +281,7 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
       setLatestRemediation(rem);
 
       // Also pre-fetch the different-form verification question
-      const quiz = await api.generateQuiz(topic || "Newton's Laws", sessionId, 10);
+      const quiz = await api.generateQuiz(topic || "General Knowledge", sessionId, 10);
       const verifyQ = quiz.questions.find(
         (q) => q.question_type === "verification" || q.id.includes("verify")
       );
@@ -224,6 +333,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   const clearSession = () => {
     setSessionId(null);
     setTopic(null);
+    setSessionLength(null);
+    setCurrentQuestionIndex(1);
     setCurrentQuestion(null);
     setVerificationQuestion(null);
     setActiveHypotheses([]);
@@ -233,6 +344,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
     setLastAnswerResult(null);
     sessionStorage.removeItem(STORAGE_SESSION_KEY);
     sessionStorage.removeItem(STORAGE_TOPIC_KEY);
+    sessionStorage.removeItem(STORAGE_LENGTH_KEY);
+    sessionStorage.removeItem(STORAGE_INDEX_KEY);
   };
 
   return (
@@ -240,6 +353,8 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
       value={{
         sessionId,
         topic,
+        sessionLength,
+        currentQuestionIndex,
         currentQuestion,
         verificationQuestion,
         activeHypotheses,
@@ -253,6 +368,9 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
         lastAnswerResult,
         startSession,
         submitAnswer,
+        pauseSession,
+        resumeSession,
+        endSession,
         fetchRemediation,
         submitVerification,
         clearSession,

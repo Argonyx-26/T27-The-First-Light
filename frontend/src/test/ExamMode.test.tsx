@@ -218,17 +218,17 @@ describe("Exam Mode API Client", () => {
 });
 
 describe("ExamSetupPage UI", () => {
-  it("renders exam setup header, presets, and topic options", () => {
+  it("renders exam setup header, topic input, and configuration options", () => {
     render(
       <BrowserRouter>
         <ExamSetupPage />
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/Exam Mode with Post-Mortem Diagnostics/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Comprehensive Science/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Newton's Laws of Motion/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Standard Prelims/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Adaptive Exam Mode/i)).toBeInTheDocument();
+    expect(screen.getByText(/Enter Exam Topic/i)).toBeInTheDocument();
+    expect(screen.getByText(/Data Structures & Algorithms/i)).toBeInTheDocument();
+    expect(screen.getByText(/Number of Questions/i)).toBeInTheDocument();
     expect(screen.getByText(/Start Timed Exam/i)).toBeInTheDocument();
   });
 });

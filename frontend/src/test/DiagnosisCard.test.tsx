@@ -39,7 +39,7 @@ describe("DiagnosisCard", () => {
 
     expect(screen.getByText("We found the pattern.")).toBeInTheDocument();
     expect(screen.getByText("Heavier Objects Fall Faster")).toBeInTheDocument();
-    expect(screen.getByText("88%")).toBeInTheDocument();
+    expect(screen.getByText("Confirmed Pattern")).toBeInTheDocument();
     expect(screen.getByText("Fix this misconception")).toBeInTheDocument();
   });
 

@@ -50,6 +50,7 @@ class IngestionPipeline:
         db: Optional[Session] = None,
         topic: Optional[str] = None,
         file_obj: Optional[Any] = None,
+        on_progress: Optional[Any] = None,
     ) -> RAGUploadResponse:
         # Handle file_obj if provided
         if file_bytes is None and file_obj is not None:
@@ -76,18 +77,30 @@ class IngestionPipeline:
                 f"Unsupported format '{ext}'. Supported formats: {', '.join(DocumentLoader.SUPPORTED_EXTENSIONS)}"
             )
 
-        # 2. Save file
+        # 2. Stage 1: Uploading / Storing file
+        if on_progress:
+            on_progress("uploading", f"Saving {filename} to local store...")
         doc_id = f"doc_{uuid.uuid4().hex[:12]}"
         safe_filename = Path(filename).name
         target_path = self.storage_dir / f"{doc_id}_{safe_filename}"
         target_path.write_bytes(file_bytes)
 
         try:
-            # 3. Text Extraction with Page Boundaries
+            # 3. Stage 2: Text Extraction with Page Boundaries
+            if on_progress:
+                on_progress("extracting", "Extracting text and document structure...")
             pages = DocumentLoader.load_pages(target_path)
             page_count = len(pages)
 
-            # 4. Chunking
+            preview_text = ""
+            if pages:
+                first_text = pages[0].get("text", "") if isinstance(pages[0], dict) else getattr(pages[0], "text", "")
+                if first_text:
+                    preview_text = first_text[:400].strip()
+
+            # 4. Stage 3: Chunking
+            if on_progress:
+                on_progress("chunking", f"Partitioning {page_count} page(s) into semantic chunks...")
             chunks = self.chunker.chunk_pages(
                 document_id=doc_id,
                 document_name=safe_filename,
@@ -99,7 +112,9 @@ class IngestionPipeline:
             if chunk_count == 0:
                 raise IngestionError(f"No usable text chunks could be extracted from '{safe_filename}'.")
 
-            # 5. Embedding
+            # 5. Stage 4: Embedding and Vector Indexing
+            if on_progress:
+                on_progress("indexing", f"Embedding and indexing {chunk_count} chunk(s) in ChromaDB...")
             texts_to_embed = [c.text for c in chunks]
             embeddings = self.embedding_provider.embed_texts(texts_to_embed)
 
@@ -118,7 +133,11 @@ class IngestionPipeline:
                     chunk_count=chunk_count,
                     status="ready",
                     topic=topic,
+                    preview_text=preview_text,
                 )
+
+            if on_progress:
+                on_progress("ready", f"Ingestion complete for '{safe_filename}'.")
 
             return RAGUploadResponse(
                 success=True,

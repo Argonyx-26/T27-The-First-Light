@@ -19,6 +19,7 @@ import {
   XCircle,
   ArrowRight,
   BookOpen,
+  Image as ImageIcon,
 } from "lucide-react";
 import { api } from "@/api/client";
 import { ExamReportResponse, ExamMisconceptionItem, ExamQuestionReportDetail } from "@/types";
@@ -477,6 +478,30 @@ export const ExamReportPage: React.FC = () => {
                     </div>
                   )}
 
+                  {/* Multi-Modal Visual Artifact */}
+                  {q.visual_artifact_svg && (
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5 text-indigo-600" />
+                        Visual Schematic: Misconception vs. Reality
+                      </span>
+                      <div
+                        className="p-3 rounded-xl bg-white border border-slate-200 overflow-x-auto flex justify-center items-center shadow-inner"
+                        dangerouslySetInnerHTML={{ __html: q.visual_artifact_svg }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Feynman Explanation */}
+                  {q.feynman_explanation && (
+                    <div className="p-3 rounded-xl bg-indigo-50/70 border border-indigo-200/80 text-xs text-indigo-950 space-y-1">
+                      <span className="font-bold uppercase tracking-wider text-[10px] text-indigo-800 block">
+                        Feynman Technique Intuitive Reframe:
+                      </span>
+                      <p className="leading-relaxed">{q.feynman_explanation}</p>
+                    </div>
+                  )}
+
                   {/* Pedagogical Explanation */}
                   {q.explanation && (
                     <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1">
@@ -485,6 +510,23 @@ export const ExamReportPage: React.FC = () => {
                         <span>Pedagogical Rationale</span>
                       </div>
                       <p className="leading-relaxed">{q.explanation}</p>
+                    </div>
+                  )}
+
+                  {/* Status Change Indicator */}
+                  {q.status_change && (
+                    <div className="flex items-center space-x-2 pt-1 text-xs">
+                      <span className="text-slate-500 font-medium">Concept Trajectory:</span>
+                      <Badge
+                        variant={q.is_correct ? "secondary" : "outline"}
+                        className={`text-[10px] font-bold ${
+                          q.is_correct
+                            ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                            : "bg-rose-50 text-rose-800 border-rose-300"
+                        }`}
+                      >
+                        {q.status_change}
+                      </Badge>
                     </div>
                   )}
                 </div>

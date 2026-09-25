@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   GraduationCap,
@@ -7,100 +7,73 @@ import {
   AlertTriangle,
   ArrowRight,
   Sparkles,
-  BookOpen,
-  Atom,
-  Flame,
-  HelpCircle,
   ShieldAlert,
+  Target,
+  Zap,
 } from "lucide-react";
 import { api } from "@/api/client";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 
-interface Preset {
-  id: string;
-  name: string;
-  questionCount: 10 | 12 | 15;
-  timeLimitMinutes: number;
-  description: string;
-  badge?: string;
-  recommended?: boolean;
-}
-
-const PRESETS: Preset[] = [
-  {
-    id: "quick",
-    name: "Quick Assessment",
-    questionCount: 10,
-    timeLimitMinutes: 15,
-    description: "Rapid diagnostic calibration. Ideal for a quick self-check.",
-    badge: "15 Min",
-  },
-  {
-    id: "standard",
-    name: "Standard Prelims",
-    questionCount: 12,
-    timeLimitMinutes: 20,
-    description: "Balanced competitive prelims format with deep distractor discrimination.",
-    badge: "Recommended",
-    recommended: true,
-  },
-  {
-    id: "deep",
-    name: "Comprehensive Prelims",
-    questionCount: 15,
-    timeLimitMinutes: 30,
-    description: "Thorough multi-concept assessment across all core curriculum subdomains.",
-    badge: "30 Min",
-  },
+const SUGGESTED_TOPICS = [
+  "Data Structures & Algorithms",
+  "Linear Search",
+  "Binary Search",
+  "Arrays & Strings",
+  "Sorting Algorithms",
+  "Chemical Bonding",
 ];
 
-const TOPICS = [
-  {
-    id: "Comprehensive Science",
-    name: "Comprehensive Science",
-    desc: "Evenly samples from Newton's Laws, Kinematics, and Chemical Bonding.",
-    icon: Sparkles,
-    badge: "Multi-Topic",
-  },
-  {
-    id: "Newton's Laws",
-    name: "Newton's Laws of Motion",
-    desc: "Forces, inertia, action-reaction, friction, and elevator dynamics.",
-    icon: Atom,
-  },
-  {
-    id: "Kinematics",
-    name: "Classical Kinematics",
-    desc: "Velocity vs acceleration, projectile symmetry, and free fall under gravity.",
-    icon: BookOpen,
-  },
-  {
-    id: "Chemical Bonding",
-    name: "Chemical Bonding & Molecular Structure",
-    desc: "Ionic/covalent nature, formal charge, octet exceptions, and dipole polarity.",
-    icon: Flame,
-  },
-];
+const QUESTION_COUNTS = [6, 9, 12, 15, 18, 24];
+const DURATIONS = [10, 15, 20, 30, 45, 60];
 
 export const ExamSetupPage: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedTopic, setSelectedTopic] = useState<string>("Comprehensive Science");
-  const [selectedPreset, setSelectedPreset] = useState<Preset>(PRESETS[1]);
-  const [studentId, setStudentId] = useState<string>("");
+  const [topic, setTopic] = useState<string>("");
+  const [questionCount, setQuestionCount] = useState<number>(12);
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState<number>(20);
+  const [detectedWeaknesses, setDetectedWeaknesses] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Active student ID from local storage
+  const activeStudentId = localStorage.getItem("mm_student_id") || "student_default";
+
+  useEffect(() => {
+    // Check for detected weaknesses in the student's history
+    api.getDailyRevision(activeStudentId)
+      .then((res) => {
+        if (res && res.questions && res.questions.length > 0) {
+          const weaknesses = res.questions
+            .map((it) => it.target_misconception_label || it.question?.concept || it.question?.topic)
+            .filter(Boolean) as string[];
+          setDetectedWeaknesses(weaknesses.slice(0, 3));
+        }
+      })
+      .catch(() => {
+        // Non-blocking
+      });
+  }, [activeStudentId]);
+
+  const easyCount = Math.floor(questionCount / 3);
+  const hardCount = Math.floor(questionCount / 3);
+  const mediumCount = questionCount - easyCount - hardCount;
+
   const handleStartExam = async () => {
+    if (!topic.trim()) {
+      setError("Please specify an exam topic.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
       const res = await api.createExam({
-        topic: selectedTopic,
-        question_count: selectedPreset.questionCount,
-        time_limit_minutes: selectedPreset.timeLimitMinutes,
-        student_id: studentId.trim() || undefined,
+        topic: topic.trim(),
+        question_count: questionCount,
+        time_limit_minutes: timeLimitMinutes,
+        student_id: activeStudentId,
       });
       navigate(`/exam/${res.exam_id}`);
     } catch (err: any) {
@@ -110,20 +83,20 @@ export const ExamSetupPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-16">
+    <div className="max-w-4xl mx-auto space-y-8 pb-16">
       {/* Header */}
       <div className="space-y-3 text-center sm:text-left">
         <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold">
           <GraduationCap className="h-4 w-4" />
-          <span>Stage 6 — Competitive Prelims Simulation</span>
+          <span>Competitive Exam &amp; PYQ Simulation</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
-          Exam Mode with Post-Mortem Diagnostics
+          Adaptive Exam Mode
         </h1>
-        <p className="text-base text-muted-foreground max-w-3xl leading-relaxed">
-          Experience real timed exam conditions with server-authoritative countdown timing, mark-for-review,
-          and confidence tracking. When you finish, our deterministic engine conducts an instant diagnostic
-          post-mortem answering: <strong className="text-slate-800">"Why did I lose these marks?"</strong>
+        <p className="text-sm sm:text-base text-muted-foreground max-w-3xl leading-relaxed">
+          Take a strict, server-timed exam with authentic Past Year Questions (PYQs). 
+          Questions are equally partitioned into <strong className="text-slate-800">Easy, Medium, and Difficult</strong> tiers, 
+          and targeted specifically to your diagnosed conceptual weaknesses.
         </p>
       </div>
 
@@ -134,189 +107,213 @@ export const ExamSetupPage: React.FC = () => {
         </div>
       )}
 
-      {/* Step 1: Topic Selection */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
-            1
+      {/* Weakness Alert if Student Has Prior Learning History */}
+      {detectedWeaknesses.length > 0 && (
+        <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/90 text-amber-950 space-y-1.5">
+          <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-amber-900">
+            <Target className="w-4 h-4 text-amber-600" />
+            <span>Weakness-Targeted Diagnostics Active</span>
           </div>
-          <h2 className="text-lg font-bold text-slate-900">Select Exam Topic Domain</h2>
+          <p className="text-xs text-amber-900">
+            Based on your past practice sessions, the exam generator will prioritize questions testing your active cognitive root causes:{" "}
+            <strong>{detectedWeaknesses.join(", ")}</strong>.
+          </p>
         </div>
+      )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {TOPICS.map((topic) => {
-            const Icon = topic.icon;
-            const isSelected = selectedTopic === topic.id;
-            return (
-              <div
-                key={topic.id}
-                onClick={() => setSelectedTopic(topic.id)}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                  isSelected
-                    ? "border-primary bg-indigo-50/40 ring-2 ring-primary/20 shadow-sm"
-                    : "border-slate-200 hover:border-slate-300 bg-white"
+      {/* Step 1: Topic Input */}
+      <Card className="border border-border/80 shadow-2xs bg-white">
+        <CardHeader className="pb-3">
+          <div className="flex items-center space-x-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+              1
+            </div>
+            <CardTitle className="text-base font-bold text-slate-900">Enter Exam Topic</CardTitle>
+          </div>
+          <CardDescription className="text-xs">
+            Type any topic or select a suggested domain to generate tailored PYQs.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <input
+            type="text"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="Search for a topic to take a quiz"
+            className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30 font-medium"
+            autoFocus
+          />
+
+          <div className="flex items-center flex-wrap gap-2 pt-1">
+            <span className="text-xs text-muted-foreground font-semibold">Suggestions:</span>
+            {SUGGESTED_TOPICS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTopic(t)}
+                className={`text-xs px-2.5 py-1 rounded-lg border transition font-medium ${
+                  topic.toLowerCase() === t.toLowerCase()
+                    ? "bg-indigo-600 text-white border-indigo-600 shadow-2xs"
+                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className={`p-2.5 rounded-lg ${
-                        isSelected ? "bg-primary text-white" : "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-900 text-sm sm:text-base">{topic.name}</h3>
-                      {topic.badge && (
-                        <span className="inline-block mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">
-                          {topic.badge}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {isSelected && <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />}
-                </div>
-                <p className="mt-2.5 text-xs text-muted-foreground leading-relaxed">{topic.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Step 2: Preset Format */}
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
-            2
+                {t}
+              </button>
+            ))}
           </div>
-          <h2 className="text-lg font-bold text-slate-900">Choose Exam Format & Duration</h2>
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {PRESETS.map((preset) => {
-            const isSelected = selectedPreset.id === preset.id;
-            return (
-              <div
-                key={preset.id}
-                onClick={() => setSelectedPreset(preset)}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
-                  isSelected
-                    ? "border-primary bg-indigo-50/40 ring-2 ring-primary/20 shadow-sm"
-                    : "border-slate-200 hover:border-slate-300 bg-white"
+      {/* Step 2: Question Count & Difficulty Partition */}
+      <Card className="border border-border/80 shadow-2xs bg-white">
+        <CardHeader className="pb-3">
+          <div className="flex items-center space-x-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+              2
+            </div>
+            <CardTitle className="text-base font-bold text-slate-900">Number of Questions</CardTitle>
+          </div>
+          <CardDescription className="text-xs">
+            Questions are equally distributed across difficulty tiers.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            {QUESTION_COUNTS.map((cnt) => (
+              <button
+                key={cnt}
+                type="button"
+                onClick={() => setQuestionCount(cnt)}
+                className={`py-3 px-2 rounded-xl text-center border font-bold transition text-sm ${
+                  questionCount === cnt
+                    ? "bg-primary text-white border-primary shadow-sm ring-2 ring-primary/20"
+                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                 }`}
               >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-800">
-                      {preset.badge || `${preset.timeLimitMinutes} min`}
-                    </span>
-                    {isSelected && <CheckCircle2 className="h-4 w-4 text-primary" />}
-                  </div>
-                  <h3 className="font-bold text-slate-900 text-base">{preset.name}</h3>
-                  <div className="mt-1 text-xs font-medium text-slate-600 flex items-center space-x-2">
-                    <span>{preset.questionCount} Questions</span>
-                    <span>•</span>
-                    <span>{preset.timeLimitMinutes} Minutes</span>
-                  </div>
-                  <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-                    {preset.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                {cnt} Qs
+              </button>
+            ))}
+          </div>
 
-      {/* Step 3: Student Identification & Exam Rules */}
+          {/* Equal Difficulty Breakdown Badge */}
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span className="font-semibold text-slate-700 flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-amber-500" />
+              Equally Balanced PYQ Distribution:
+            </span>
+            <div className="flex items-center space-x-2 font-mono text-xs">
+              <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold border border-emerald-200">
+                {easyCount} Easy
+              </span>
+              <span>+</span>
+              <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold border border-amber-200">
+                {mediumCount} Medium
+              </span>
+              <span>+</span>
+              <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-semibold border border-rose-200">
+                {hardCount} Difficult
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Step 3: Duration Selector */}
+      <Card className="border border-border/80 shadow-2xs bg-white">
+        <CardHeader className="pb-3">
+          <div className="flex items-center space-x-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+              3
+            </div>
+            <CardTitle className="text-base font-bold text-slate-900">Exam Duration</CardTitle>
+          </div>
+          <CardDescription className="text-xs">
+            Server-authoritative timer. Test terminates automatically when time expires.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            {DURATIONS.map((dur) => (
+              <button
+                key={dur}
+                type="button"
+                onClick={() => setTimeLimitMinutes(dur)}
+                className={`py-3 px-2 rounded-xl text-center border font-bold transition text-sm flex items-center justify-center gap-1 ${
+                  timeLimitMinutes === dur
+                    ? "bg-primary text-white border-primary shadow-sm ring-2 ring-primary/20"
+                    : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span>{dur} min</span>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Strict Protocol & Start Button */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
-        <Card className="lg:col-span-2 border-slate-200 shadow-sm">
-          <CardHeader>
+        <Card className="lg:col-span-2 border-slate-200 shadow-2xs bg-white">
+          <CardHeader className="pb-2">
             <CardTitle className="text-base font-bold flex items-center space-x-2 text-slate-900">
               <ShieldAlert className="h-5 w-5 text-indigo-600" />
-              <span>Exam Rules & Diagnostic Protocol</span>
+              <span>Strict Exam Environment</span>
             </CardTitle>
             <CardDescription className="text-xs">
-              Simulating standard prelims examination conditions
+              Zero answer revelation or mid-exam correctness feedback
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3.5 text-xs text-slate-700">
+          <CardContent className="space-y-3 text-xs text-slate-700">
             <div className="flex items-start space-x-2.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
               <span>
-                <strong>Server-Authoritative Timer:</strong> The countdown is verified by the backend.
-                Refreshing or closing the page will not reset your remaining time.
+                <strong>Blind Testing:</strong> No scores, answers, or solution hints will be shown during the exam.
               </span>
             </div>
             <div className="flex items-start space-x-2.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
               <span>
-                <strong>Question Palette & Review:</strong> You may navigate between questions in any order
-                and flag questions for review before submitting.
+                <strong>Post-Mortem Diagnostics:</strong> Upon submission, you will receive an in-depth breakdown of your score, difficulty-tier mastery, and full multi-modal remediation (visual artifacts &amp; Feynman breakdowns) for any missed questions.
               </span>
             </div>
             <div className="flex items-start space-x-2.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
               <span>
-                <strong>Confidence Rating (1–5):</strong> Calibrate how sure you feel about each answer.
-                This distinguishes overconfidence and cognitive misconceptions from calculation slips or blind guesses.
-              </span>
-            </div>
-            <div className="flex items-start space-x-2.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-              <span>
-                <strong>Post-Mortem Analysis:</strong> No answers or solutions are revealed during the exam.
-                Upon submission, you receive an immediate, detailed cognitive audit.
+                <strong>Longitudinal Recovery:</strong> Answering questions correctly will mark previously detected misconceptions as resolved in your learner profile!
               </span>
             </div>
           </CardContent>
         </Card>
 
-        {/* Start Card */}
-        <Card className="border-slate-200 shadow-sm flex flex-col justify-between">
-          <CardHeader>
-            <CardTitle className="text-base font-bold text-slate-900">Ready to Begin?</CardTitle>
-            <CardDescription className="text-xs">
-              Confirm your candidate details below
-            </CardDescription>
+        {/* Start Button Card */}
+        <Card className="border-slate-200 shadow-2xs bg-white flex flex-col justify-between">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-bold text-slate-900">Summary</CardTitle>
+            <CardDescription className="text-xs">Review parameters before beginning</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700">Candidate / Student ID</label>
-              <input
-                type="text"
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                placeholder="e.g. Alex Rivera or leave blank"
-                className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/30"
-              />
-              <span className="text-[11px] text-muted-foreground block">
-                Leave blank to generate an anonymous session identifier.
-              </span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1">
+            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1.5">
               <div className="flex justify-between text-slate-600">
                 <span>Topic:</span>
-                <span className="font-semibold text-slate-900">{selectedTopic}</span>
+                <span className="font-bold text-slate-900 truncate max-w-[140px]">{topic}</span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Questions:</span>
-                <span className="font-semibold text-slate-900">{selectedPreset.questionCount}</span>
+                <span className="font-bold text-slate-900">{questionCount} Qs</span>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Time Limit:</span>
-                <span className="font-semibold text-slate-900">{selectedPreset.timeLimitMinutes} minutes</span>
+                <span>Time:</span>
+                <span className="font-bold text-slate-900">{timeLimitMinutes} mins</span>
               </div>
             </div>
 
             <Button
               onClick={handleStartExam}
-              disabled={isLoading}
-              className="w-full font-bold flex items-center justify-center space-x-2 py-5 text-sm"
+              disabled={isLoading || !topic.trim()}
+              className="w-full font-bold flex items-center justify-center space-x-2 py-5 text-sm bg-primary hover:bg-primary/90 text-white"
             >
-              <span>{isLoading ? "Starting Exam..." : "Start Timed Exam"}</span>
+              <span>{isLoading ? "Generating PYQ Exam..." : "Start Timed Exam"}</span>
               <ArrowRight className="h-4 w-4" />
             </Button>
           </CardContent>

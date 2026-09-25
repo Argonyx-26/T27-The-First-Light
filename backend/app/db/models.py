@@ -19,6 +19,9 @@ class SessionModel(Base):
     current_question_id = Column(String(64), nullable=True)
     active_misconception_id = Column(String(64), nullable=True)
     mastery_score = Column(Float, default=0.0)
+    session_length = Column(Integer, nullable=True)  # None for unlimited questions
+    final_score = Column(Float, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -124,6 +127,7 @@ class DocumentModel(Base):
     chunk_count = Column(Integer, default=0)
     status = Column(String(32), default="ready")  # processing, ready, failed
     topic = Column(String(128), nullable=True)
+    preview_text = Column(Text, nullable=True)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
 
 

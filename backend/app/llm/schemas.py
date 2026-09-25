@@ -28,6 +28,14 @@ class HypothesisProposalResponse(BaseModel):
     hypotheses: List[ProposedHypothesis] = Field(..., min_length=1, max_length=5)
 
 
+class VideoSnippet(BaseModel):
+    title: str = Field(..., description="Educational clip title")
+    youtube_video_id: str = Field(..., description="YouTube video ID")
+    start_seconds: int = Field(default=0, description="Start timestamp in seconds")
+    end_seconds: int = Field(default=120, description="End timestamp in seconds")
+    concept_summary: str = Field(..., description="Key concept addressed in this segment")
+
+
 class RemediationResponse(BaseModel):
     """Targeted remediation generated for a confirmed misconception."""
     misconception_id: str = Field(..., description="ID of the addressed misconception")
@@ -37,6 +45,9 @@ class RemediationResponse(BaseModel):
     key_takeaway: Optional[str] = Field(default=None, description="Memorable summary rule")
     check_for_understanding: Optional[str] = Field(default=None, description="Reflective question prompting self-check")
     grounded_source: Optional[str] = Field(default=None, description="Source citation or textbook reference if applicable")
+    feynman_explanation: Optional[str] = Field(default=None, description="Feynman-style simplified breakdown without jargon")
+    visual_artifact_svg: Optional[str] = Field(default=None, description="Self-contained SVG visual artifact")
+    video_snippet: Optional[VideoSnippet] = Field(default=None, description="Curated educational video segment")
 
 
 class SelfConsistencyResponse(BaseModel):

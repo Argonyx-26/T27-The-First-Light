@@ -13,7 +13,20 @@ from app.db.seed import seed_database
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Initialize tables and seed questions if empty
+    # Startup: Log key detection securely without logging secret values
+    import logging
+    logger = logging.getLogger("uvicorn.info")
+    groq_detected = bool(settings.GROQ_API_KEY and settings.GROQ_API_KEY.strip())
+    gemini_detected = bool(settings.GEMINI_API_KEY and settings.GEMINI_API_KEY.strip())
+    youtube_detected = bool(settings.YOUTUBE_API_KEY and settings.YOUTUBE_API_KEY.strip())
+    logger.info(
+        "API Key Detection: GROQ_API_KEY detected=%s, GEMINI_API_KEY detected=%s, YOUTUBE_API_KEY detected=%s",
+        groq_detected,
+        gemini_detected,
+        youtube_detected,
+    )
+
+    # Initialize tables and seed questions if empty
     init_db()
     with SessionLocal() as db:
         seed_database(db)

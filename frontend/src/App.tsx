@@ -15,6 +15,8 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { KnowledgeMapPage } from "./pages/KnowledgeMapPage";
 import { RevisionPage } from "./pages/RevisionPage";
 import { DailyRevisionPage } from "./pages/DailyRevisionPage";
+import { HistoryPage } from "./pages/HistoryPage";
+import { LibraryPage } from "./pages/LibraryPage";
 
 
 // Exam Mode Pages
@@ -59,6 +61,8 @@ export const App: React.FC = () => {
               <Route path="/knowledge-gaps" element={<KnowledgeMapPage />} />
               <Route path="/revision" element={<RevisionPage />} />
               <Route path="/revision/daily" element={<DailyRevisionPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/library" element={<LibraryPage />} />
 
               {/* Exam Mode Routes */}
 

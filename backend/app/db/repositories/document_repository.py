@@ -17,6 +17,7 @@ def create_document(
     chunk_count: int = 0,
     status: str = "ready",
     topic: Optional[str] = None,
+    preview_text: Optional[str] = None,
 ) -> DocumentModel:
     doc = DocumentModel(
         id=document_id,
@@ -27,6 +28,7 @@ def create_document(
         chunk_count=chunk_count,
         status=status,
         topic=topic,
+        preview_text=preview_text,
     )
     db.add(doc)
     db.commit()

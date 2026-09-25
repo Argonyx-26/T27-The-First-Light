@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Lightbulb, BookOpen, Key, ArrowRight, HelpCircle, Sparkles, FileText, CheckCircle2, Image as ImageIcon } from "lucide-react";
+import { Lightbulb, BookOpen, Key, ArrowRight, HelpCircle, Sparkles, FileText, CheckCircle2, Image as ImageIcon, Video, Compass, Play, ExternalLink } from "lucide-react";
 import { RemediationResponse } from "@/types";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -21,6 +21,11 @@ export const RemediationCard: React.FC<RemediationCardProps> = ({
     ? `${primarySource.document_name} — ${primarySource.source_type === "image" ? `Figure, Page ${primarySource.page_number}` : `Page ${primarySource.page_number}`}`
     : "Course Notes";
 
+  const formatSeconds = (sec: number) => {
+    const mins = Math.floor(sec / 60);
+    const remainingSecs = sec % 60;
+    return `${mins}:${remainingSecs.toString().padStart(2, "0")}`;
+  };
 
   return (
     <Card className="border border-border/80 shadow-card bg-card overflow-hidden">
@@ -28,7 +33,7 @@ export const RemediationCard: React.FC<RemediationCardProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
           <div className="flex items-center space-x-2 text-indigo-300 text-xs font-semibold tracking-wider uppercase">
             <Lightbulb className="w-4 h-4" />
-            <span>Targeted Remediation</span>
+            <span>Targeted Multi-Modal Remediation</span>
           </div>
 
           {isGrounded ? (
@@ -44,7 +49,7 @@ export const RemediationCard: React.FC<RemediationCardProps> = ({
         </div>
 
         <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-          Let&apos;s fix this.
+          Let&apos;s master this concept.
         </h2>
         <p className="text-sm text-slate-300 mt-1 max-w-xl">
           {remediation.remediation_title || "Reframing the core conceptual principle"}
@@ -69,7 +74,6 @@ export const RemediationCard: React.FC<RemediationCardProps> = ({
               </span>
             </div>
 
-
             {primarySource?.excerpt && (
               <blockquote className="pl-3 border-l-2 border-emerald-400 text-xs sm:text-sm text-emerald-900 italic bg-white/60 p-2.5 rounded-r-md">
                 &ldquo;{primarySource.excerpt}&rdquo;
@@ -78,6 +82,74 @@ export const RemediationCard: React.FC<RemediationCardProps> = ({
 
             <p className="text-[11px] text-emerald-700 font-medium">
               Anchored directly in your course notes, reflecting the definitions and principles taught in class.
+            </p>
+          </div>
+        )}
+
+        {/* Feynman Technique Simplified Breakdown */}
+        {remediation.feynman_explanation && (
+          <div className="p-5 rounded-xl bg-gradient-to-br from-indigo-50/90 via-purple-50/50 to-blue-50/60 border border-indigo-200/80 space-y-3">
+            <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-indigo-900">
+              <Compass className="w-4 h-4 text-indigo-600" />
+              <span>The Feynman Technique: Intuitive Breakdown (EL12)</span>
+            </div>
+            <p className="text-sm text-slate-800 leading-relaxed">
+              {remediation.feynman_explanation}
+            </p>
+          </div>
+        )}
+
+        {/* Visual Schematic Diagram Artifact */}
+        {remediation.visual_artifact_svg && (
+          <div className="space-y-2">
+            <h4 className="text-xs uppercase font-bold tracking-wider text-slate-700 flex items-center">
+              <ImageIcon className="w-3.5 h-3.5 mr-1.5 text-indigo-600" />
+              Visual Schematic: Misconception vs. Physical Reality
+            </h4>
+            <div
+              className="p-4 rounded-xl bg-white border border-border shadow-inner overflow-x-auto flex justify-center items-center"
+              dangerouslySetInnerHTML={{ __html: remediation.visual_artifact_svg }}
+            />
+          </div>
+        )}
+
+        {/* Curated / Dynamic Video Snippet */}
+        {remediation.video_snippet && remediation.video_snippet.youtube_video_id && (
+          <div className="p-5 rounded-xl bg-slate-900 text-white space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-rose-400">
+                <Video className="w-4 h-4" />
+                <span>Video Tutorial: {remediation.video_snippet.title}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={`https://www.youtube.com/watch?v=${remediation.video_snippet.youtube_video_id}&t=${remediation.video_snippet.start_seconds || 0}s`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs px-2.5 py-0.5 rounded-full bg-rose-600/30 text-rose-300 hover:bg-rose-600/50 border border-rose-500/40 flex items-center gap-1 transition-colors"
+                >
+                  <span>Watch on YouTube</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1 font-mono">
+                  <Play className="w-3 h-3 text-rose-400 fill-rose-400" />
+                  {formatSeconds(remediation.video_snippet.start_seconds)} - {remediation.video_snippet.end_seconds ? formatSeconds(remediation.video_snippet.end_seconds) : "End"}
+                </span>
+              </div>
+            </div>
+
+            <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-slate-800 bg-black">
+              <iframe
+                title={remediation.video_snippet.title}
+                src={`https://www.youtube-nocookie.com/embed/${remediation.video_snippet.youtube_video_id}?start=${remediation.video_snippet.start_seconds}${remediation.video_snippet.end_seconds ? `&end=${remediation.video_snippet.end_seconds}` : ""}&rel=0`}
+                className="w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+            <p className="text-xs text-slate-300">
+              <span className="font-semibold text-rose-300">Target Focus: </span>
+              {remediation.video_snippet.concept_summary}
             </p>
           </div>
         )}
