@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Lightbulb, BookOpen, Key, ArrowRight, HelpCircle, Sparkles, FileText, CheckCircle2, Image as ImageIcon, Video, Compass, Play, ExternalLink } from "lucide-react";
+import { Lightbulb, BookOpen, Key, ArrowRight, HelpCircle, Sparkles, FileText, CheckCircle2, Image as ImageIcon, Video, Compass, Play, ExternalLink, GitFork, ArrowDown, Check, X } from "lucide-react";
 import { RemediationResponse } from "@/types";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -98,6 +98,129 @@ export const RemediationCard: React.FC<RemediationCardProps> = ({
             </p>
           </div>
         )}
+
+        {/* Step-by-Step Decision Flowchart: Path to Correct Answer */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-b from-slate-50 via-white to-slate-50 border border-indigo-100/90 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-slate-200/80">
+            <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-indigo-900">
+              <GitFork className="w-4 h-4 text-indigo-600" />
+              <span>Step-by-Step Decision Flowchart: Path to Correct Answer</span>
+            </div>
+            <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full">
+              Visual Reasoning Flow
+            </span>
+          </div>
+
+          <div className="space-y-3 pt-1">
+            {/* Step 1: Given Problem Scenario */}
+            <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center justify-between gap-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                  1
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Step 1 • Problem Context</span>
+                  <div className="text-xs sm:text-sm font-bold text-slate-900">
+                    Analyze Problem Conditions &amp; Scenario Constraints
+                  </div>
+                </div>
+              </div>
+              <span className="text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded hidden sm:inline-block">
+                Start Node
+              </span>
+            </div>
+
+            {/* Connecting Decision Fork Arrow */}
+            <div className="flex justify-center my-0.5">
+              <div className="flex items-center space-x-1.5 text-slate-500 bg-slate-100 px-3 py-1 rounded-full text-[11px] font-semibold border border-slate-200">
+                <ArrowDown className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Evaluate Reasoning Strategy</span>
+              </div>
+            </div>
+
+            {/* Step 2: The Decision Fork (Trap vs. Correct Logic) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              {/* Flawed Branch */}
+              <div className="p-4 rounded-xl border border-rose-300 bg-rose-50/70 space-y-2 flex flex-col justify-between">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-rose-800 flex items-center gap-1.5">
+                      <X className="w-3.5 h-3.5 text-rose-600 stroke-[2.5]" />
+                      <span>Intuitive Trap (Misconception)</span>
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-200 text-rose-900 border border-rose-300">
+                      Wrong Path ✗
+                    </span>
+                  </div>
+                  <p className="text-xs text-rose-950 leading-relaxed font-medium">
+                    {remediation.differences && remediation.differences.length > 0 && remediation.differences[0]?.misconception_aspect
+                      ? remediation.differences[0].misconception_aspect
+                      : `Mistakenly assuming ${remediation.misconception_id.replace(/_/g, " ")} dictates this outcome.`}
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-rose-200 text-[11px] text-rose-800 flex items-center justify-between font-semibold">
+                  <span>Consequence:</span>
+                  <span className="text-rose-700 underline decoration-rose-400">Selected Incorrect Distractor</span>
+                </div>
+              </div>
+
+              {/* Correct Branch */}
+              <div className="p-4 rounded-xl border border-emerald-300 bg-emerald-50/80 space-y-2 flex flex-col justify-between shadow-2xs">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[2.5]" />
+                      <span>Scientific / Algorithmic Rule</span>
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-200 text-emerald-900 border border-emerald-300">
+                      Correct Path ✓
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-950 leading-relaxed font-semibold">
+                    {remediation.differences && remediation.differences.length > 0 && remediation.differences[0]?.reality_aspect
+                      ? remediation.differences[0].reality_aspect
+                      : "Apply the formal definition and fundamental scientific principle directly."}
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-emerald-200 text-[11px] text-emerald-800 flex items-center justify-between font-semibold">
+                  <span>Consequence:</span>
+                  <span className="text-emerald-900">Direct Path to Correct Answer</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Connecting Arrow */}
+            <div className="flex justify-center my-0.5">
+              <div className="flex items-center space-x-1.5 text-emerald-800 bg-emerald-100/90 px-3 py-1 rounded-full text-[11px] font-semibold border border-emerald-300">
+                <ArrowDown className="w-3.5 h-3.5 text-emerald-700" />
+                <span>Arrive at Verified Solution</span>
+              </div>
+            </div>
+
+            {/* Step 3: Verified Correct Answer & Takeaway */}
+            <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-300 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
+                    ✓
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-900">
+                    Step 3 • Verified Correct Answer &amp; Master Rule
+                  </span>
+                </div>
+                <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">
+                  Concept Mastered
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-emerald-950 font-medium pl-8">
+                <span className="font-semibold text-emerald-800">Verified Path: </span>
+                {remediation.differences && remediation.differences.length > 0 && remediation.differences[0]?.reality_aspect
+                  ? `Apply: "${remediation.differences[0].reality_aspect}" to arrive at the true option.`
+                  : "Follow the core conceptual definition to eliminate the distractor and confirm the right option."}
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Visual Schematic Diagram Artifact */}
         {remediation.visual_artifact_svg && (
