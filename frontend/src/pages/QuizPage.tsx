@@ -178,7 +178,7 @@ export const QuizPage: React.FC = () => {
       } else {
         // Incorrect answer
         if (!inProbingLoop) {
-          // Initiate 5-question follow-up probing loop
+          // Initiate 2-question follow-up probing loop
           setInProbingLoop(true);
           setFollowUpCount(1);
           setAnsweredState({
@@ -190,7 +190,7 @@ export const QuizPage: React.FC = () => {
           });
         } else {
           // Already in probing loop
-          const reachedLimit = followUpCount >= 5;
+          const reachedLimit = followUpCount >= 2;
           const confirmedMisconception = isConfirmed || reachedLimit;
 
           setAnsweredState({
@@ -240,7 +240,7 @@ export const QuizPage: React.FC = () => {
           </span>
           {inProbingLoop && (
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-              Diagnostic Follow-up Probing ({followUpCount}/5)
+              Diagnostic Follow-up Probing ({followUpCount}/2)
             </span>
           )}
         </div>
@@ -422,8 +422,8 @@ export const QuizPage: React.FC = () => {
                 </h4>
                 <p className="text-sm text-indigo-900/90 mt-1 max-w-xl">
                   {!answeredState.wasProbing
-                    ? "One mistake doesn't explain your thinking. We're launching up to 5 targeted follow-up questions from the hypothesis pool to isolate any misconception. If you answer one correctly, normal practice resumes!"
-                    : `Follow-up question ${answeredState.followUpNumber} of 5. Let's test this alternative scenario to narrow down the misconception.`}
+                    ? "One mistake doesn't explain your thinking. We're launching up to 2 targeted follow-up questions from the hypothesis pool to isolate any misconception. If you answer one correctly, normal practice resumes!"
+                    : `Follow-up question ${answeredState.followUpNumber} of 2. Let's test this alternative scenario to narrow down the misconception.`}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto flex-shrink-0">
@@ -440,8 +440,8 @@ export const QuizPage: React.FC = () => {
                 >
                   <span>
                     {!answeredState.wasProbing
-                      ? "Start Follow-up Probing (1/5)"
-                      : `Next Follow-up (${answeredState.followUpNumber + 1}/5)`}
+                      ? "Start Follow-up Probing (1/2)"
+                      : `Next Follow-up (${answeredState.followUpNumber + 1}/2)`}
                   </span>
                   <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Button>

@@ -147,7 +147,7 @@ describe("Wrong Answer Diagnosis Flow", () => {
     // 1. Verify immediate feedback banner with follow-up probing
     await waitFor(() => {
       expect(screen.getByText("Not quite right.")).toBeInTheDocument();
-      expect(screen.getByText("Start Follow-up Probing (1/5)")).toBeInTheDocument();
+      expect(screen.getByText("Start Follow-up Probing (1/2)")).toBeInTheDocument();
       expect(screen.getByText("View Diagnosis")).toBeInTheDocument();
     });
 
