@@ -59,6 +59,8 @@ from app.api.schemas import (
     TeacherExamsResponse,
     LossAttributionResponse,
     MisconceptionJourneyResponse,
+    CalibrationTrendPoint,
+    CalibrationTrendResponse,
 )
 from app.db.cohort_seed import DEMO_STUDENTS, seed_cohort_if_needed
 from app.db.database import get_db
@@ -80,6 +82,7 @@ from app.db.repositories import (
 )
 from app.engine.exam_diagnostic import analyze_exam_submission, compute_longitudinal_loss_attribution
 from app.engine.journey_engine import compute_misconception_journey
+from app.engine.learning_path_engine import compute_learning_path, compute_calibration_trend
 from app.engine.hypothesis_engine import (
     check_confirmation_gate,
     get_top_hypotheses,
@@ -1745,6 +1748,43 @@ def get_misconception_journey(
     """
     res = compute_misconception_journey(db, session_id, misconception_id)
     return MisconceptionJourneyResponse(**res)
+
+
+# ==============================================================================
+# 12. Learning Path & Calibration Trend Endpoints
+# ==============================================================================
+@router.get("/learning-path/{session_id}", response_model=KnowledgeMapResponse)
+def get_learning_path(
+    session_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Returns prescriptive Learning Path over Knowledge Map, deterministically
+    ranking persistent/developing concepts by blocked downstream dependencies
+    and revision priority. Sets recommended_next: True on the top priority target.
+    """
+    session = session_repo.get_session(db, session_id)
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session '{session_id}' not found.",
+        )
+    res = compute_learning_path(db, session_id)
+    return KnowledgeMapResponse(**res)
+
+
+@router.get("/analytics/calibration-trend/{student_id}", response_model=CalibrationTrendResponse)
+def get_calibration_trend(
+    student_id: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Returns longitudinal calibration index and accuracy points across student sessions.
+    """
+    seed_cohort_if_needed(db)
+    res = compute_calibration_trend(db, student_id)
+    return CalibrationTrendResponse(**res)
+
 
 
 

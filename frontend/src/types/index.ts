@@ -153,6 +153,10 @@ export interface KnowledgeMapNode {
   status: "mastered" | "developing" | "resolved" | "persistent" | string;
   parent_concept_id?: string | null;
   mastery_score?: number | null;
+  recommended_next?: boolean;
+  next_recommended_rank?: number | null;
+  dependent_concepts_blocked?: number;
+  revision_priority?: number;
 }
 
 export interface KnowledgeMapEdge {
@@ -580,6 +584,23 @@ export interface MisconceptionJourneyResponse {
   current_stage_index: number;
   stages: JourneyStageItem[];
 }
+
+export interface CalibrationTrendPoint {
+  session_id: string;
+  label: string;
+  date: string;
+  topic: string;
+  calibration_index: number;
+  accuracy: number;
+  high_confidence_accuracy: number;
+  total_attempts: number;
+}
+
+export interface CalibrationTrendResponse {
+  student_id: string;
+  points: CalibrationTrendPoint[];
+}
+
 
 
 

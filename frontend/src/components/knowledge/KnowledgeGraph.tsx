@@ -10,7 +10,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { KnowledgeMapNode } from "@/types";
 import { Badge } from "@/components/ui/Badge";
-import { BookOpen, AlertCircle, CheckCircle, HelpCircle } from "lucide-react";
+import { BookOpen, AlertCircle, CheckCircle, HelpCircle, Sparkles } from "lucide-react";
 
 interface KnowledgeGraphProps {
   nodesData: KnowledgeMapNode[];
@@ -34,22 +34,48 @@ const ConceptNode = ({ data }: { data: { label: string; status: string } }) => {
 };
 
 // Custom Node for Misconceptions
-const MisconceptionNode = ({ data }: { data: { label: string; status: string; isSelected?: boolean } }) => {
+const MisconceptionNode = ({
+  data,
+}: {
+  data: {
+    label: string;
+    status: string;
+    isSelected?: boolean;
+    recommendedNext?: boolean;
+    rank?: number | null;
+    blockedCount?: number;
+  };
+}) => {
   const isResolved = data.status === "resolved";
   const isPersistent = data.status === "persistent";
+  const isRecommended = data.recommendedNext;
 
   return (
     <div
       className={`px-4 py-3 shadow-subtle rounded-xl bg-white border cursor-pointer transition-all hover:scale-[1.02] hover:shadow-md ${
-        data.isSelected
+        isRecommended
+          ? "border-amber-400 bg-amber-50/20 ring-2 ring-amber-400 shadow-md"
+          : data.isSelected
           ? "border-indigo-600 ring-2 ring-indigo-400 shadow-md"
           : "border-border hover:border-indigo-300"
       } min-w-[220px] max-w-[260px]`}
     >
       <Handle type="target" position={Position.Top} className="!bg-slate-400" />
+
+      {/* Recommended Next Priority Banner */}
+      {isRecommended && (
+        <div className="mb-2 flex items-center justify-between bg-amber-100/90 text-amber-900 border border-amber-300 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md animate-pulse">
+          <span className="flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-amber-600" />
+            Next Target
+          </span>
+          <span>Rank #{data.rank || 1}</span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Gap Probe (Click for Journey)
+          Gap Probe
         </span>
         <Badge
           variant={isResolved ? "resolved" : isPersistent ? "persistent" : "developing"}
@@ -74,6 +100,13 @@ const MisconceptionNode = ({ data }: { data: { label: string; status: string; is
       <div className="text-xs font-semibold text-slate-800 leading-snug">
         {data.label}
       </div>
+
+      {data.blockedCount !== undefined && data.blockedCount > 0 && !isResolved && (
+        <div className="text-[10px] text-slate-500 font-medium mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between">
+          <span>Blocks downstream:</span>
+          <span className="font-bold text-slate-700">{data.blockedCount} concepts</span>
+        </div>
+      )}
     </div>
   );
 };
@@ -124,6 +157,9 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
           label: mn.label,
           status: mn.status,
           isSelected: selectedMisconceptionId === mn.id,
+          recommendedNext: mn.recommended_next,
+          rank: mn.next_recommended_rank,
+          blockedCount: mn.dependent_concepts_blocked,
         },
       });
 
@@ -132,10 +168,16 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
         source: conceptNodeItem.id,
         target: mn.id,
         type: "smoothstep",
-        animated: mn.status === "persistent",
+        animated: mn.status === "persistent" || !!mn.recommended_next,
         style: {
-          stroke: mn.status === "resolved" ? "#10b981" : mn.status === "persistent" ? "#ef4444" : "#94a3b8",
-          strokeWidth: 2,
+          stroke: mn.recommended_next
+            ? "#f59e0b"
+            : mn.status === "resolved"
+            ? "#10b981"
+            : mn.status === "persistent"
+            ? "#ef4444"
+            : "#94a3b8",
+          strokeWidth: mn.recommended_next ? 3 : 2,
         },
       });
     });

@@ -210,6 +210,11 @@ class KnowledgeMapNode(BaseModel):
     status: str  # "mastered", "developing", "resolved", "persistent"
     parent_concept_id: Optional[str] = None
     mastery_score: Optional[float] = None
+    recommended_next: bool = False
+    next_recommended_rank: Optional[int] = None
+    dependent_concepts_blocked: int = 0
+    revision_priority: float = 0.0
+
 
 
 class KnowledgeMapEdge(BaseModel):
@@ -610,5 +615,22 @@ class MisconceptionJourneyResponse(BaseModel):
     current_stage: str
     current_stage_index: int
     stages: List[JourneyStageItem]
+
+
+class CalibrationTrendPoint(BaseModel):
+    session_id: str
+    label: str
+    date: str
+    topic: str
+    calibration_index: float
+    accuracy: float
+    high_confidence_accuracy: float
+    total_attempts: int
+
+
+class CalibrationTrendResponse(BaseModel):
+    student_id: str
+    points: List[CalibrationTrendPoint]
+
 
 

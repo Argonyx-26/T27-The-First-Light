@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { GitFork, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { GitFork, ArrowRight, ArrowLeft, Loader2, Sparkles } from "lucide-react";
 
 export const KnowledgeMapPage: React.FC = () => {
   const { sessionId, topic } = useSession();
@@ -30,13 +30,16 @@ export const KnowledgeMapPage: React.FC = () => {
       }
       try {
         setLoading(true);
-        const res = await api.getKnowledgeMap(sessionId);
+        const res = await api.getLearningPath(sessionId).catch(() => api.getKnowledgeMap(sessionId));
         setData(res);
 
-        // Auto-select first misconception if available
+        // Auto-select recommended_next misconception if available, otherwise first misconception
+        const recommendedMisc = res.nodes?.find((n) => n.type === "misconception" && n.recommended_next);
         const firstMisc = res.nodes?.find((n) => n.type === "misconception");
-        if (firstMisc) {
-          setSelectedMiscId(firstMisc.id);
+        const targetNode = recommendedMisc || firstMisc;
+        if (targetNode) {
+          const cleanId = targetNode.id.startsWith("node_") ? targetNode.id.replace("node_", "") : targetNode.id;
+          setSelectedMiscId(cleanId);
         }
       } catch (err: any) {
         setError(err.message || "Failed to load knowledge map.");
@@ -116,6 +119,42 @@ export const KnowledgeMapPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Prescriptive Learning Path Callout */}
+      {(() => {
+        const rec = data?.nodes?.find((n) => n.type === "misconception" && n.recommended_next);
+        if (!rec) return null;
+        const cleanId = rec.id.startsWith("node_") ? rec.id.replace("node_", "") : rec.id;
+        return (
+          <div className="p-4 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 rounded-xl bg-amber-500 text-white shadow-xs">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-950 bg-amber-200/90 px-2 py-0.5 rounded">
+                    Learning Path Priority #1
+                  </span>
+                  <span className="text-xs text-amber-900 font-semibold">
+                    Blocks {rec.dependent_concepts_blocked || 1} downstream concepts
+                  </span>
+                </div>
+                <h4 className="text-sm font-bold text-slate-900 mt-0.5">
+                  Recommended Target: {rec.label}
+                </h4>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setSelectedMiscId(cleanId)}
+              className="text-xs font-bold text-amber-950 bg-white hover:bg-amber-100 border border-amber-300 px-3 py-1.5 rounded-lg shadow-xs transition-colors self-end sm:self-auto"
+            >
+              Focus Journey Timeline →
+            </button>
+          </div>
+        );
+      })()}
+
       {/* Main Graph Component */}
       <Card className="border border-border/80 shadow-card bg-white overflow-hidden p-2">
         {data && data.nodes ? (
@@ -123,7 +162,10 @@ export const KnowledgeMapPage: React.FC = () => {
             nodesData={data.nodes}
             topic={data.topic || topic || "Core Concept"}
             selectedMisconceptionId={selectedMiscId}
-            onSelectMisconception={(nodeId) => setSelectedMiscId(nodeId)}
+            onSelectMisconception={(nodeId) => {
+              const clean = nodeId.startsWith("node_") ? nodeId.replace("node_", "") : nodeId;
+              setSelectedMiscId(clean);
+            }}
           />
         ) : (
           <div className="h-64 flex items-center justify-center text-sm text-muted-foreground">

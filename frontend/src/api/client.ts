@@ -30,6 +30,7 @@ import {
   TeacherExamsResponse,
   LossAttributionResponse,
   MisconceptionJourneyResponse,
+  CalibrationTrendResponse,
 } from "@/types";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -218,6 +219,14 @@ export const api = {
   },
 
   /**
+   * Retrieves prescriptive Learning Path over Knowledge Map with recommended_next ranking.
+   */
+  async getLearningPath(sessionId: string): Promise<KnowledgeMapResponse> {
+    return request<KnowledgeMapResponse>(`/learning-path/${encodeURIComponent(sessionId)}`);
+  },
+
+
+  /**
    * Retrieves prioritized revision items.
    */
   async getRevisionList(sessionId: string): Promise<RevisionListResponse> {
@@ -340,6 +349,15 @@ export const api = {
   async getMisconceptionJourney(sessionId: string, misconceptionId: string): Promise<MisconceptionJourneyResponse> {
     return request<MisconceptionJourneyResponse>(
       `/journey/${encodeURIComponent(sessionId)}/${encodeURIComponent(misconceptionId)}`
+    );
+  },
+
+  /**
+   * Retrieves longitudinal confidence calibration trend points across student sessions.
+   */
+  async getCalibrationTrend(studentId: string): Promise<CalibrationTrendResponse> {
+    return request<CalibrationTrendResponse>(
+      `/analytics/calibration-trend/${encodeURIComponent(studentId)}`
     );
   },
 

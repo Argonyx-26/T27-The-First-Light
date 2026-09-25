@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSession } from "@/context/SessionContext";
 import { api } from "@/api/client";
-import { DashboardResponse, LossAttributionResponse } from "@/types";
+import { DashboardResponse, LossAttributionResponse, CalibrationTrendPoint } from "@/types";
 import { MasteryCard } from "@/components/dashboard/MasteryCard";
 import { ConfidenceCalibrationChart } from "@/components/dashboard/ConfidenceCalibrationChart";
+import { CalibrationTrendChart } from "@/components/dashboard/CalibrationTrendChart";
 import { LossAttributionCard } from "@/components/analytics/LossAttributionCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +17,7 @@ export const DashboardPage: React.FC = () => {
   const { sessionId, topic } = useSession();
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [lossData, setLossData] = useState<LossAttributionResponse | null>(null);
+  const [trendPoints, setTrendPoints] = useState<CalibrationTrendPoint[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,12 +29,16 @@ export const DashboardPage: React.FC = () => {
       }
       try {
         setLoading(true);
-        const [dashRes, lossRes] = await Promise.all([
+        const [dashRes, lossRes, trendRes] = await Promise.all([
           api.getDashboard(sessionId),
           api.getLossAttribution(sessionId).catch(() => null),
+          api.getCalibrationTrend(sessionId).catch(() => null),
         ]);
         setData(dashRes);
         setLossData(lossRes);
+        if (trendRes?.points) {
+          setTrendPoints(trendRes.points);
+        }
       } catch (err: any) {
         setError(err.message || "Failed to load dashboard metrics.");
       } finally {
@@ -179,6 +185,11 @@ export const DashboardPage: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Longitudinal Metacognitive Calibration Trajectory */}
+      {trendPoints.length > 0 && (
+        <CalibrationTrendChart points={trendPoints} />
+      )}
     </div>
   );
 };
